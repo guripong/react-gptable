@@ -1,6 +1,6 @@
 {
   "name": "react-gptable",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "gptable",
   "private": false,
   "author": "guripong",
@@ -31,7 +31,6 @@
   "files": [
     "dist"
   ],
-  
   "scripts": {
     "deploy_npm": "npm version patch && npm publish",
     "dev": "tsc && vite build --watch",
