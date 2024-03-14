@@ -2,25 +2,40 @@
   "name": "react-gptable",
   "version": "1.0.0",
   "description": "gptable",
+  "private": false,
   "author": "guripong",
   "homepage": "https://github.com/guripong/react-gptable",
-  "repository": "github:guripong/react-gptable",
-  "license": "ISC",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/guripong/react-gptable.git"
+  },
+  "peerDependencies": {
+    "react": ">= 17",
+    "react-dom": ">= 17"
+  },
+  "engines": {
+    "node": ">= 14"
+  },
   "keywords": [
-    "vite",
-    "typescript",
-    "npm",
-    "package"
+    "table",
+    "react",
+    "react table",
+    "react-gptable",
+    "gptabe"
   ],
-  "main": "dist/index.cjs.js",
+  "main": "dist/index.es.js",
   "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
   "type": "module",
   "files": [
     "dist"
   ],
+  
   "scripts": {
+    "deploy_npm": "npm version patch && npm publish",
     "dev": "tsc && vite build --watch",
+    "copy": "xcopy /E /I /Y dist src\\dist",
     "start": "vite --host --open",
     "build": "tsc && vite build",
     "build:types": "dts-bundle-generator --config ./dts-bundle-generator.config.ts",
