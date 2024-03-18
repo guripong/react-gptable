@@ -12,3 +12,9 @@
 *:not(input) {
     cursor: default;
 }
+
+html,body,#root,.app{
+    width:100%;
+    padding:0;
+    margin:0;
+}

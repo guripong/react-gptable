@@ -13,6 +13,8 @@ interface GPTableInstance {
     getGPtableElementRef: () => HTMLDivElement | null;
     getTable: () => ReturnType<typeof useReactTable>;
     forceRerender: () => void;
+    set_columnOrder: ([]:Array<any>) => void;
+    get_columnOrder: () => any;
 }
 
 // GPprops 인터페이스 정의
@@ -20,15 +22,21 @@ interface GPtableProps {
     className?: string;
     column: ColumnDef<any, any>[]; // 여기서 컬럼의 타입을 정확히 지정해야 합니다.
     data: any[]; // 데이터의 타입도 정확히 지정해야 합니다.
-    defaultPageSize?: number;
-    pagination?: boolean;
-    defaultToolbar?: boolean;
-    toolbar?: () => JSX.Element;
+
     onClickRow?: (e: MouseEvent, row: any) => void; // 클릭된 행의 타입을 정확히 지정해야 합니다.
     option?: {
-        globalfilter?: boolean;
-        pagination?: boolean;
-        paginationArr?: Array<number>;
+      
+        // pagination?: boolean;
+        pagination?:{
+            paginationArr?: Array<number>;
+            defaultPageSize?:number;
+        }
+        toolbar?:{
+            globalfilter?: boolean;
+            defaultToolbar?: boolean;
+            columnAttributeButton?: boolean;
+            toolbar?: () => JSX.Element;
+        }
     }
 }// 컬럼의 타입 정의
 

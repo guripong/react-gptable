@@ -1,0 +1,42 @@
+.dropDown{
+    position: fixed;
+    z-index:2000;
+    box-sizing: border-box;
+    outline:4px solid red;
+    
+    .dropDownWrap{
+        position:relative;
+        left:-50%;
+        top:20px;
+        background-color: #fff; /* 모달 배경색 */
+        border: 1px solid #ccc; /* 모달 테두리 */
+        padding:10px;
+        .dropDown-triangle {
+            left:calc(50% - 10px);
+            top:-10px;
+            width: 20px;
+            height: 20px;
+            z-index:2;
+            transform:rotate(45deg);
+            background-color: white;
+            border-left:1px solid rgb(200,200,200);
+            border-top:1px solid rgb(200,200,200);
+            position:absolute;
+        }
+        
+        .dropdown-content {
+         
+            position:absolute;
+            left:50%;
+            z-index: 1000; /* 모달이 다른 요소 위에 오도록 설정 */
+        
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+            padding: 8px; /* 내부 여백 */
+            max-height: 200px; /* 최대 높이 설정 (넘치는 경우 스크롤) */
+            overflow-y: auto; /* 내용이 넘칠 경우 스크롤 표시 */
+            overflow-x: hidden; /* 가로 스크롤 숨김 */
+        
+          }
+    }
+   
+}

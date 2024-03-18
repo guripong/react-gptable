@@ -1,14 +1,13 @@
 $table-border-color:lightgray;
-
+$main-color:#145894;
 .GP_table {
     width:100%;
-    .gp_datalist{
 
-    }
     .gp_input{
         box-sizing: border-box;
         font-family:Arial, FontAwesome;
         width:100%;
+        // min-width:100px;
         box-sizing: border-box;
         height:35px;
         border:none;
@@ -19,14 +18,88 @@ $table-border-color:lightgray;
         padding-left:7px;
     }
 
+
+    .pagination{
+        box-sizing: border-box;
+        min-height:50px;
+        width:100%;
+        border:1px solid rgb(236, 231, 231);
+        border-top:none;
+        display:flex;
+        flex-flow:row wrap;
+        align-content: space-between;
+        justify-content: center;
+        padding:2px;
+        .prev,
+        .next{
+            height:46px;
+            width:23%;
+            min-width:100px;
+            border:none;
+            outline:none;
+            background-color:gray;
+            color:white;
+            border-radius: 4px;
+            text-align: center;
+
+            &:hover:not([disabled]){
+                background-color: $main-color;
+                cursor:pointer;
+            }
+            &:disabled{
+                opacity: 0.7;
+                &:hover{
+                    cursor:not-allowed;
+                }
+            }
+        }
+        .middle{
+            height:46px;
+            width:40%;
+            min-width:250px;
+            display:flex;
+            justify-content: center;
+            align-items: center;
+
+            .nowPage{
+                height:35px;
+                width:50px;
+                border:1px solid rgb(200,200,200);
+                border-radius:4px;
+                outline:none;
+                text-align: center;
+                box-sizing: border-box;               
+            }
+            input::-webkit-outer-spin-button,
+            input::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+            input[type=number] {
+                -moz-appearance: textfield;
+              }
+            .viewRows{
+                height:35px;
+                border:1px solid rgb(200,200,200);
+                border-radius:4px;
+                outline:none;
+                cursor:pointer;
+                box-sizing: border-box;
+            }
+        }
+        
+    }
+
+
+
+
     // cursor:default;
     .tableToolbar {
         display: flex;
         flex-flow: row wrap;
         align-content: space-between;
         justify-content: flex-end;
-        padding-top: 5px;
-        padding-bottom: 5px;
+        padding:5px;        
         box-sizing: border-box;
 
         .btn {
@@ -212,35 +285,54 @@ $table-border-color:lightgray;
     }
     .filterWrap{
         margin:5px;
+        .numberFilter{
+            display:flex;
+        }
     }
 
-    .table{
-        font-size: 1rem;
+    .tableWrap{
+        overflow-x: auto;
+        // width:500px;
         width:100%;
-        border: 1px solid $table-border-color;
-        border-collapse: collapse;
-        .header{
-            position: relative;
-            cursor: pointer;
-            height:30px;
-            font-size:1.2rem;
-            &:hover{
-                font-size:1.1rem;
+        .table{
+            font-size: 1rem;
+            // width:auto;
+            border: 1px solid $table-border-color;
+            border-collapse: collapse;
+            .header{
+                position: relative;
+                cursor: pointer;
+                height:30px;
+                font-size:1.2rem;
+                &:hover{
+                    // font-size:1.1rem;
+                    color:red;
+                }
+            }
+            
+            td{
+          
+                white-space: nowrap; //줄바꿈금지
+                  
+                border:1px solid $table-border-color;
+                // text-align: center;
+                padding:5px 10px 5px 10px; // top right bottom left
+            }
+            th {
+                white-space: nowrap; //줄바꿈금지
+                border:1px solid $table-border-color;
+                .header{
+                    display:flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+                // border: 1px solid red;
+                // border-right: 1px solid lightgray;
+                // padding: 2px 4px;
             }
         }
-        
-        td{
-            border:1px solid $table-border-color;
-            // text-align: center;
-            padding:5px 10px 5px 10px; // top right bottom left
-        }
-        th {
-            border:1px solid $table-border-color;
-            // border: 1px solid red;
-            // border-right: 1px solid lightgray;
-            // padding: 2px 4px;
-        }
     }
+ 
     
 
 

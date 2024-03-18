@@ -25,9 +25,9 @@ import {
   rankItem,
   compareItems,
 } from '@tanstack/match-sorter-utils'
-
 import "./GPtable.scss";
 import { DebouncedInput } from './components/DebouncedInput';
+import Dropdown from './components/DropDown';
 //https://codesandbox.io/p/devbox/github/tanstack/table/tree/main/examples/react/filters?embed=1&file=%2Fsrc%2Fmain.tsx%3A72%2C2-178%2C1&theme=light
 
 declare module '@tanstack/table-core' {
@@ -88,10 +88,11 @@ function Filter({
         : Array.from(column.getFacetedUniqueValues().keys()).sort(),
     [column.getFacetedUniqueValues()]
   )
+  console.log("firstValue", firstValue)
 
   return typeof firstValue === 'number' ? (
     <div>
-      <div className="flex space-x-2">
+      <div className="numberFilter">
 
         <DebouncedInput
           type="number"
@@ -127,8 +128,8 @@ function Filter({
   ) : (
     <>
       <datalist id={column.id + 'list'}>
-        {sortedUniqueValues.slice(0, 5000).map((value: any) => (
-          <option value={value} key={value} />
+        {sortedUniqueValues.slice(0, 5000).map((value: any, index) => (
+          <option value={value} key={value + `_${index}`} />
         ))}
       </datalist>
       <DebouncedInput
@@ -144,95 +145,118 @@ function Filter({
 }
 
 
-
-
-// // A debounced input react component
-// function DebouncedInput({
-//   value: initialValue,
-//   onChange,
-//   debounce = 200,
-//   ...props
-// }: {
-//   value: string | number
-//   onChange: (value: string | number) => void
-//   debounce?: number
-// } & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'>) {
-//   const [value, setValue] = React.useState(initialValue)
-
-//   React.useEffect(() => {
-//     setValue(initialValue)
-//   }, [initialValue])
-
-//   React.useEffect(() => {
-//     const timeout = setTimeout(() => {
-//       onChange(value)
-//     }, debounce)
-//     return () => clearTimeout(timeout)
-//   }, [value])
-
-//   return (
-//     <input {...props} value={value} onChange={e => setValue(e.target.value)} />
-//   )
-// }
-
-
 const GPtable = forwardRef<GPTableInstance, GPtableProps>((props, ref) => {
   const { className,
     column: icolumn,
     data: data,
-    defaultPageSize,
-    defaultToolbar,
-    toolbar,
+    // defaultPageSize,
+    // defaultToolbar,
+    // toolbar,
     onClickRow,
     option
   } = props;
 
   const rerender = useReducer(() => ({}), {})[1];
-  const globalfilter = option?.globalfilter || false;
-  const pagination = option?.pagination || false;
-  const paginationArr = (option?.paginationArr && Array.isArray(option.paginationArr)) ? option.paginationArr : [10, 20, 30, 40];
-
+  const globalfilter = option?.toolbar?.globalfilter || false;
+  const pagination = option?.pagination || null;
+  const paginationArr = (pagination?.paginationArr && Array.isArray(pagination.paginationArr)) ? pagination.paginationArr : [10, 20, 30, 40];
+  const defaultPageSize = Number.isInteger(pagination?.defaultPageSize) ? pagination?.defaultPageSize : paginationArr[0];
 
 
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState('');
-  const gpTableRef = useRef<HTMLDivElement>(null);
+  const gpTableWrapRef = useRef<HTMLDivElement>(null);
 
 
 
   const columns = useMemo<ColumnDef<any, any>[]>(() => {
-    const newColumns=[];
-    for(let i = 0 ; i<icolumn.length; i++){
-      newColumns.push({
+    // const columns = useMemo<any[]>(() => {
+    const newColumns = [];
+
+
+    for (let i = 0; i < icolumn.length; i++) {
+      const oneColumn: any = icolumn[i];
+
+      let obj: any = {
         ...icolumn[i],
-        // header: () => <span>{icolumn[i].Header}</span>
-      })
+        enableHiding: true,
+        // minSize:5000
+        // cell: info => info.getValue()
+        // footer: props => props.column.id
+        // footer: props => props.column.id,
+      }
+      // if(icolumn[i].cell){
+      //   obj.cell=icolumn[i].cell ;
+      // }
+      if (oneColumn.checkbox) {
+
+      }
+      if (oneColumn.Header) {
+        obj.header = (() => oneColumn.Header);
+      }
+      if (oneColumn.header) {
+        obj.header = oneColumn.header;
+      }
+      if (oneColumn.width) {
+        obj.size = oneColumn.width;
+      }
+      if (oneColumn.minWidth) {
+        obj.minSize = oneColumn.minWidth;
+      }
+
+      obj.enableHiding = oneColumn.enableHiding !== undefined ? oneColumn.enableHiding : true
+      // if(obj.accessorKey){
+      //   obj.id = obj.accessorKey;
+      // }
+      // cell: info => info.getValue()
+
+      newColumns.push(obj)
     }
 
-
-
+    // console.log("newColumns", newColumns)
+    return newColumns;
+    /*
     return [{
 
-      id: 'firstName',
-      a: 1234,
+      // id: 'firstName',
+      // a: 1234,
       accessorKey: 'firstName',
-      accessorFn: row => row.firstName,
-      cell: info => info.getValue(),
+      accessorFn: row => row.firstName, //default
+      cell: info => info.getValue(), //default
       // header: () => <span>ㅁㄴㄹ</span>,
-      footer: props => props.column.id,
+      // footer: props => props.column.id,
 
     },
     {
-      id: 'lastName',
+      // id: 'lastName',
       accessorKey: 'lastName',
       accessorFn: row => row.lastName + "2", //값랜더1차 필터먹힘
       cell: info => info.getValue(),//값랜더2차 여기는 필터가 안댐
       header: () => <span>Last Name</span>,
-      footer: props => props.column.id,
+      // footer: props => props.column.id,
       filterFn: 'fuzzy', //default..
       sortingFn: fuzzySort, //default임..
     }];
+    */
   }, [icolumn, data])
+  // console.log("columns", columns)
+
+  const initColumVisibility = useMemo(() => {
+    let obj: any = {
+    };
+    for (let i = 0; i < icolumn.length; i++) {
+      const oneColumn: any = icolumn[i];
+      // console.log("oneColumn",oneColumn)
+      if (oneColumn.show === false) {
+        obj[oneColumn.accessorKey] = false;
+      }
+      else {
+        obj[oneColumn.accessorKey] = true;
+      }
+    }
+    return obj;
+  }, [icolumn])
+
 
 
   const table = useReactTable({
@@ -245,7 +269,36 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps>((props, ref) => {
       columnFilters,
       globalFilter,
     },
+    initialState: {
+      pagination: {
+        pageSize: pagination ? defaultPageSize : data.length,
+        pageIndex: 0,
+      },
+
+      // columnOrder: ['age', 'firstName', 'lastName'], //customize the initial column order
+      columnVisibility: initColumVisibility,
+      // expanded: true, //expand all rows by default
+      sorting: [
+        {
+          id: 'age',
+          desc: true //sort by age in descending order by default
+        }
+      ]
+      // pagination:false,
+      // pageIndex:0,
+      // PaginationTableState :{
+      //   pageSize:pagination === false ?
+      //   (data.length ? (data.length < 5 ? 5 : data.length) : 5)
+      //   :
+      //   defaultPageSize ? defaultPageSize : 5,
+      // }
+      // hiddenColumns:((=>{
+      // }))
+
+
+    },
     onColumnFiltersChange: setColumnFilters,
+    // onPaginationChange:
     onGlobalFilterChange: setGlobalFilter,
     globalFilterFn: fuzzyFilter,
     enableColumnResizing: true,
@@ -271,13 +324,24 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps>((props, ref) => {
         return "power"
       },
       getGPtableElementRef: () => {
-        return gpTableRef?.current;
+        return gpTableWrapRef?.current;
       },
       getTable: () => {
         return table;
       },
       forceRerender: () => {
         rerender();
+      },
+      set_columnOrder: (newOrder) => {
+        /*
+            table.setColumnOrder(
+              faker.helpers.shuffle(table.getAllLeafColumns().map(d => d.id))
+            )
+        */
+        table.setColumnOrder(newOrder);
+      },
+      get_columnOrder: () => {
+        return table.getAllLeafColumns();
       }
     }
   }, [table]);
@@ -289,10 +353,14 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps>((props, ref) => {
   //     }
   //   }
   // }, [table.getState().columnFilters[0]?.id])
+  // console.log("table.getTotalSize()", table.getTotalSize())
+  const columnAttributeBtnRef = useRef(null);
 
+  const [columnAttributePopup, set_columnAttributePopup] = useState(false);
   return (
-    <div className={`GP_table ${className}`} ref={gpTableRef} >
+    <div className={`GP_table ${className}`} ref={gpTableWrapRef} >
 
+      {/* 툴바 */}
       <div className="tableToolbar">
         {globalfilter &&
           <div className="global-filter">
@@ -307,156 +375,265 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps>((props, ref) => {
             />
           </div>
         }
-      </div>
 
-      <table className="table">
-        <thead>
-          {table.getHeaderGroups().map(headerGroup => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map(header => {
-                // console.log("H",header.column.columnDef.header)
-                // console.log(header.getContext())
-
-
+        <button className="btn" ref={columnAttributeBtnRef} onClick={() => {
+          set_columnAttributePopup(d => !d);
+        }} >config</button>
+        
+        <Dropdown buttonRef={columnAttributeBtnRef} show={columnAttributePopup} 
+          onClose={()=>{
+            set_columnAttributePopup(false);
+        }}>
+          {columnAttributePopup &&
+            <div className="columnAttribute" >
+              <div className="onecheckColumn">
+                <label>
+                  <input
+                    {...{
+                      type: 'checkbox',
+                      checked: table.getIsAllColumnsVisible(),
+                      onChange: table.getToggleAllColumnsVisibilityHandler(),
+                    }}
+                  />{' '}
+                  전체토글
+                </label>
+              </div>
+              {table.getAllLeafColumns().map(column => {
+                // console.log("column", column)
+                // column.setFilterValue("소")
+                const CD: any = column.columnDef;
+                const string = CD.Header ? CD.Header : column.id;
                 return (
-                  <th key={header.id}
-                    colSpan={header.colSpan}
-                    style={{ position: 'relative', width: header.getSize() }}
-                  >
-                    {header.isPlaceholder
-                      ? null : (
-                        <>
-                          <div style={{background:"red"}}
-                            {...{
+                  <div key={column.id} className="onecheckColumn">
+                    <label>
+                      <input
+                        {...{
+                          type: 'checkbox',
+                          checked: column.getIsVisible(),
+                          onChange: column.getToggleVisibilityHandler(),
+                          disabled: !CD.enableHiding
+                        }}
+                      />{' '}
+                      {string}
+                    </label>
+                  </div>)
+              })}
+
+            </div>
+          }
+        </Dropdown>
+
+        {/* 
+        {columnAttributePopup &&
+          <div className="columnAttribute" >
+
+            <div className="onecheckColumn">
+              <label>
+                <input
+                  {...{
+                    type: 'checkbox',
+                    checked: table.getIsAllColumnsVisible(),
+                    onChange: table.getToggleAllColumnsVisibilityHandler(),
+                  }}
+                />{' '}
+                전체토글
+              </label>
+            </div>
+            {table.getAllLeafColumns().map(column => {
+              // console.log("column", column)
+              // column.setFilterValue("소")
+              const CD: any = column.columnDef;
+              const string = CD.Header ? CD.Header : column.id;
+              return (
+                <div key={column.id} className="onecheckColumn">
+                  <label>
+                    <input
+                      {...{
+                        type: 'checkbox',
+                        checked: column.getIsVisible(),
+                        onChange: column.getToggleVisibilityHandler(),
+                        disabled: !CD.enableHiding
+                      }}
+                    />{' '}
+                    {string}
+                  </label>
+                </div>)
+            })}
+
+          </div>
+        } */}
+      </div>
+      {/* 툴바끝 */}
+
+
+
+
+
+      {/* 실제테이블 */}
+      <div className="tableWrap">
+        <table className="table"
+          style={{
+            width: table.getTotalSize(),
+            minWidth: "100%"
+          }}
+        >
+          <thead>
+            {table.getHeaderGroups().map(headerGroup => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map(header => {
+                  // console.log("H",header.column.columnDef.header)
+                  // console.log(header.getContext())
+                  // console.log("header", header)
+                  // console.log("header.column", header.column.columnDef)
+                  const columnDef: any = header.column.columnDef;
+                  // const size = header.getSize();
+                  // console.log("size", size);
+                  // header.
+                  return (
+                    <th key={header.id}
+                      colSpan={header.colSpan}
+                      style={{ width: header.getSize() === Number.MAX_SAFE_INTEGER ? "auto" : header.getSize() }}
+                    >
+
+                      {header.isPlaceholder
+                        ? null : (
+                          <>
+                            <div {...{
                               className: `header`,
-                              onClick: header.column.getToggleSortingHandler(),
+                              onClick: columnDef?.useSort === false ? () => { } : header.column.getToggleSortingHandler(),
                             }}
-                          >
-                            {flexRender(header.column.columnDef.header,header.getContext())}
+                            >
+                              {flexRender(header.column.columnDef.header, header.getContext())}
 
                               {/* 리사이즈 */}
-                            {header.column.getCanResize() && (
-                              <div
-                                onMouseDown={header.getResizeHandler()}
-                                onTouchStart={header.getResizeHandler()}
-                                className={`resizer ${header.column.getIsResizing() ? 'isResizing' : ''
-                                  }`}
-                              ></div>
-                            )}
+                              {header.column.getCanResize() && (
+                                <div
+                                  onMouseDown={header.getResizeHandler()}
+                                  onTouchStart={header.getResizeHandler()}
+                                  className={`resizer ${header.column.getIsResizing() ? 'isResizing' : ''
+                                    }`}
+                                ></div>
+                              )}
 
-                                {/* 소트 */}
-                            <div className={`sortor ${header.column.getIsSorted() as string?header.column.getIsSorted() :'nonea'}`}/>
+                              {/* 소트 */}
+                              <div className={`${columnDef?.useSort === false ? "" : "sortor"} ${header.column.getIsSorted() as string ? header.column.getIsSorted() : ''}`} />
 
-                          </div>
-
-                          {header.column.getCanFilter() ? (
-                            <div className="filterWrap">
-                              <Filter column={header.column} table={table} />
                             </div>
-                          ) : null}
-                        </>
-                      )}
-                  </th>
-                )
-              })}
-            </tr>
-          ))}
-        </thead>
 
-        {/* 여긴고정 바꾸지말것 */}
-        <tbody>
-          {table.getRowModel().rows.map(row => {
-            return (
-              <tr key={row.id}>
-                {row.getVisibleCells().map(cell => {
-                  return (
-                    <td key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </td>
+
+                            {/* 필터 */}
+                            {columnDef?.useFilter && header.column.getCanFilter() ? (
+                              <div className="filterWrap">
+                                <Filter column={header.column} table={table} />
+                              </div>
+                            ) : null}
+                          </>
+                        )}
+
+
+                    </th>
                   )
                 })}
               </tr>
-            )
-          })}
-        </tbody>
-      </table>
+            ))}
+          </thead>
+
+
+          {/* 여긴고정 바꾸지말것 */}
+          <tbody>
+            {table.getRowModel().rows.map(row => {
+
+              return (
+                <tr key={row.id}>
+                  {row.getVisibleCells().map(cell => {
+                    return (
+                      <td key={cell.id}
+                        style={{
+                          // width: cell.column.getSize(),
+                        }}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </td>
+                    )
+                  })}
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
 
 
 
-      아래 페이지 이동
+
+      {/* pagination */}
       {pagination &&
-        <>
-          <div className="flex items-center gap-2">
-            <button
-              className="border rounded p-1"
-              onClick={() => table.setPageIndex(0)}
-              disabled={!table.getCanPreviousPage()}
-            >
-              {'<<'}
-            </button>
-            <button
-              className="border rounded p-1"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              {'<'}
-            </button>
-            <button
-              className="border rounded p-1"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              {'>'}
-            </button>
-            <button
-              className="border rounded p-1"
-              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-              disabled={!table.getCanNextPage()}
-            >
-              {'>>'}
-            </button>
-            <span className="flex items-center gap-1">
-              <div>Page</div>
-              <strong>
-                {table.getState().pagination.pageIndex + 1} of{' '}
-                {table.getPageCount()}
-              </strong>
-            </span>
-            <span className="flex items-center gap-1">
-              | Go to page:
+
+        <div className="pagination">
+
+          <button
+            className="prev"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            {'<'}
+          </button>
+          <div className="middle">
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              Page&nbsp;
               <input
+                className="nowPage"
                 type="number"
+                max={table.getPageCount() || undefined}
                 defaultValue={table.getState().pagination.pageIndex + 1}
                 onChange={e => {
                   const page = e.target.value ? Number(e.target.value) - 1 : 0
                   table.setPageIndex(page)
                 }}
-                className="border p-1 rounded w-16"
               />
-            </span>
-            <select
-              value={table.getState().pagination.pageSize}
-              onChange={e => {
-                table.setPageSize(Number(e.target.value))
-              }}
-            >
-              {paginationArr.map(pageSize => (
-                <option key={pageSize} value={pageSize}>
-                  Show {pageSize}
-                </option>
-              ))}
-            </select>
+              &nbsp;of&nbsp;{table.getPageCount()}
+            </div>
+
+            <div style={{ marginLeft: '10%' }}>
+              <select
+                className="viewRows"
+                value={table.getState().pagination.pageSize}
+                onChange={e => {
+                  table.setPageSize(Number(e.target.value))
+                }}
+              >
+                {paginationArr.map(pageSize => (
+                  <option key={pageSize} value={pageSize}>
+                    {pageSize} rows
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
+          <button
+            className="next"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            {'>'}
+          </button>
 
-          <div>{table.getPrePaginationRowModel().rows.length} Rows</div>
 
 
-        </>
+        </div>
+
       }
+
+
+
+      <div>{table.getPrePaginationRowModel().rows.length} Rows</div>
+
+
+
 
 
       {/* <div>
