@@ -1,4 +1,4 @@
-import React, { Ref, RefAttributes, forwardRef, useImperativeHandle, useMemo, useReducer, useRef, useState } from 'react';
+import React, { Ref, RefAttributes, forwardRef, useCallback, useImperativeHandle, useMemo, useReducer, useRef, useState } from 'react';
 import { GPTableInstance, GPtableProps } from './GPprops';
 import {
   Column,
@@ -26,9 +26,11 @@ import {
   compareItems,
 } from '@tanstack/match-sorter-utils'
 import "./GPtable.scss";
-import { DebouncedInput } from './components/DebouncedInput';
-import Dropdown from './components/DropDown';
-//https://codesandbox.io/p/devbox/github/tanstack/table/tree/main/examples/react/filters?embed=1&file=%2Fsrc%2Fmain.tsx%3A72%2C2-178%2C1&theme=light
+
+import DebouncedInput from './components/DebouncedInput/DebouncedInput';
+import Dropdown from './components/DropDown/DropDown';
+import BounceCheckBox from './components/BounceCheckbox/BounceCheckBox';
+import SVGBTN from './svg/SVGBTN';
 
 declare module '@tanstack/table-core' {
   interface FilterFns {
@@ -88,7 +90,7 @@ function Filter({
         : Array.from(column.getFacetedUniqueValues().keys()).sort(),
     [column.getFacetedUniqueValues()]
   )
-  console.log("firstValue", firstValue)
+  // console.log("firstValue", firstValue)
 
   return typeof firstValue === 'number' ? (
     <div>
@@ -128,7 +130,7 @@ function Filter({
   ) : (
     <>
       <datalist id={column.id + 'list'}>
-        {sortedUniqueValues.slice(0, 5000).map((value: any, index) => (
+        {sortedUniqueValues.slice(0, 100).map((value: any, index) => (
           <option value={value} key={value + `_${index}`} />
         ))}
       </datalist>
@@ -145,18 +147,21 @@ function Filter({
 }
 
 
+
+
 const GPtable = forwardRef<GPTableInstance, GPtableProps>((props, ref) => {
   const { className,
     column: icolumn,
     data: data,
     // defaultPageSize,
     // defaultToolbar,
-    // toolbar,
     onClickRow,
-    option
+    option,
+
   } = props;
 
   const rerender = useReducer(() => ({}), {})[1];
+  const toolbarRender = option?.toolbar?.render || null;
   const globalfilter = option?.toolbar?.globalfilter || false;
   const pagination = option?.pagination || null;
   const paginationArr = (pagination?.paginationArr && Array.isArray(pagination.paginationArr)) ? pagination.paginationArr : [10, 20, 30, 40];
@@ -258,7 +263,6 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps>((props, ref) => {
   }, [icolumn])
 
 
-
   const table = useReactTable({
     data,
     columns,
@@ -315,6 +319,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps>((props, ref) => {
     debugColumns: false,
   });
 
+
   useImperativeHandle(ref, () => {
     return {
       test: (value: number) => {
@@ -333,11 +338,6 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps>((props, ref) => {
         rerender();
       },
       set_columnOrder: (newOrder) => {
-        /*
-            table.setColumnOrder(
-              faker.helpers.shuffle(table.getAllLeafColumns().map(d => d.id))
-            )
-        */
         table.setColumnOrder(newOrder);
       },
       get_columnOrder: () => {
@@ -354,9 +354,36 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps>((props, ref) => {
   //   }
   // }, [table.getState().columnFilters[0]?.id])
   // console.log("table.getTotalSize()", table.getTotalSize())
-  const columnAttributeBtnRef = useRef(null);
 
-  const [columnAttributePopup, set_columnAttributePopup] = useState(false);
+  const [showColumnAttribute, set_showColumnAttribute] = useState(false);
+
+  const rearrangeColumns = useCallback((targetId: string, direction: string) => {
+    const allColumns = table.getAllLeafColumns();
+    // console.log("allColumns",allColumns)
+    const idArr = allColumns.map(d => d.id);
+    const newOrder = [...idArr]; // 현재 컬럼 순서를 복사하여 새로운 배열 생성
+    // console.log("idArr",idArr2);
+    const targetIndex = newOrder.indexOf(targetId);
+    let ischanged: boolean = false;
+    if (direction === "up" && newOrder[targetIndex - 1]) {
+      // "up" 버튼을 누르고 현재 인덱스가 0보다 크면
+      const temp = newOrder[targetIndex - 1];
+      newOrder[targetIndex - 1] = newOrder[targetIndex];
+      newOrder[targetIndex] = temp;
+      ischanged = true;
+    } else if (direction === "down" && newOrder[targetIndex + 1]) {
+      // "down" 버튼을 누르고 현재 인덱스가 배열의 마지막 인덱스가 아니면
+      const temp = newOrder[targetIndex + 1];
+      newOrder[targetIndex + 1] = newOrder[targetIndex];
+      newOrder[targetIndex] = temp;
+      ischanged = true;
+    }
+    if (ischanged) {
+      table.setColumnOrder(newOrder);
+    }
+
+  }, [table]);
+
   return (
     <div className={`GP_table ${className}`} ref={gpTableWrapRef} >
 
@@ -371,97 +398,82 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps>((props, ref) => {
               value={globalFilter ?? ''}
               onChange={value => setGlobalFilter(String(value))}
               className="gp_input"
-              placeholder=" 모든컬럼검색"
+              placeholder={`${table.getPrePaginationRowModel().rows.length}rows 전체검색`}
             />
           </div>
         }
+        {toolbarRender && toolbarRender()}
 
-        <button className="btn" ref={columnAttributeBtnRef} onClick={() => {
-          set_columnAttributePopup(d => !d);
-        }} >config</button>
-        
-        <Dropdown buttonRef={columnAttributeBtnRef} show={columnAttributePopup} 
-          onClose={()=>{
-            set_columnAttributePopup(false);
-        }}>
-          {columnAttributePopup &&
+        <Dropdown
+          // maxHeight="400px"
+          defaultShow={showColumnAttribute}
+          close={() => set_showColumnAttribute(false)}
+          triangleStyle={{ right: "40px" }}
+          btnRender={() => {
+            return (<><button className="btn" onClick={() => set_showColumnAttribute(true)}>
+              <svg version="1.1" style={{
+                height: '50%', transition: 'transform .3s ease-in-out',
+                transform: showColumnAttribute ? 'rotate(90deg)' : ''
+              }}
+                viewBox="0 0 512 512" xmlSpace="preserve" xmlns="http://www.w3.org/2000/svg"
+                xmlnsXlink="http://www.w3.org/1999/xlink"
+                fill="currentColor">
+                <path d="M424.5,216.5h-15.2c-12.4,0-22.8-10.7-22.8-23.4c0-6.4,2.7-12.2,7.5-16.5l9.8-9.6c9.7-9.6,9.7-25.3,0-34.9l-22.3-22.1 
+                                c-4.4-4.4-10.9-7-17.5-7c-6.6,0-13,2.6-17.5,7l-9.4,9.4c-4.5,5-10.5,7.7-17,7.7c-12.8,0-23.5-10.4-23.5-22.7V89.1  c0-13.5-10.9-25.1-24.5-25.1h-30.4c-13.6,0-24.4,11.5-24.4,25.1v15.2c0,12.3-10.7,22.7-23.5,22.7c-6.4,0-12.3-2.7-16.6-7.4l-9.7-9.6  c-4.4-4.5-10.9-7-17.5-7s-13,2.6-17.5,7L110,132c-9.6,9.6-9.6,25.3,0,34.8l9.4,9.4c5,4.5,7.8,10.5,7.8,16.9  c0,12.8-10.4,23.4-22.8,23.4H89.2c-13.7,0-25.2,10.7-25.2,24.3V256v15.2c0,13.5,11.5,24.3,25.2,24.3h15.2  c12.4,0,22.8,10.7,22.8,23.4c0,6.4-2.8,12.4-7.8,16.9l-9.4,9.3c-9.6,9.6-9.6,25.3,0,34.8l22.3,22.2c4.4,4.5,10.9,7,17.5,7  c6.6,0,13-2.6,17.5-7l9.7-9.6c4.2-4.7,10.2-7.4,16.6-7.4c12.8,0,23.5,10.4,23.5,22.7v15.2c0,13.5,10.8,25.1,24.5,25.1h30.4  c13.6,0,24.4-11.5,24.4-25.1v-15.2c0-12.3,10.7-22.7,23.5-22.7c6.4,0,12.4,2.8,17,7.7l9.4,9.4c4.5,4.4,10.9,7,17.5,7  c6.6,0,13-2.6,17.5-7l22.3-22.2c9.6-9.6,9.6-25.3,0-34.9l-9.8-9.6c-4.8-4.3-7.5-10.2-7.5-16.5c0-12.8,10.4-23.4,22.8-23.4h15.2  c13.6,0,23.3-10.7,23.3-24.3V256v-15.2C447.8,227.2,438.1,216.5,424.5,216.5z M336.8,256L336.8,256c0,44.1-35.7,80-80,80  c-44.3,0-80-35.9-80-80l0,0l0,0c0-44.1,35.7-80,80-80C301.1,176,336.8,211.9,336.8,256L336.8,256z"/>
+              </svg>컬럼속성
+            </button></>)
+          }}
+        >
+          {
+            showColumnAttribute &&
             <div className="columnAttribute" >
               <div className="onecheckColumn">
-                <label>
-                  <input
-                    {...{
-                      type: 'checkbox',
-                      checked: table.getIsAllColumnsVisible(),
-                      onChange: table.getToggleAllColumnsVisibilityHandler(),
-                    }}
-                  />{' '}
-                  전체토글
-                </label>
+                <BounceCheckBox
+                  {...{
+                    checked: table.getIsAllColumnsVisible(),
+                    onChange: table.getToggleAllColumnsVisibilityHandler(),
+                    label: "전체토글"
+                  }}
+                />
               </div>
               {table.getAllLeafColumns().map(column => {
                 // console.log("column", column)
+
+                // console.log("allColumns",allColumns)
                 // column.setFilterValue("소")
                 const CD: any = column.columnDef;
                 const string = CD.Header ? CD.Header : column.id;
+                const targetID = column.id;
+
+
                 return (
                   <div key={column.id} className="onecheckColumn">
-                    <label>
-                      <input
-                        {...{
-                          type: 'checkbox',
-                          checked: column.getIsVisible(),
-                          onChange: column.getToggleVisibilityHandler(),
-                          disabled: !CD.enableHiding
-                        }}
-                      />{' '}
-                      {string}
-                    </label>
+                    <BounceCheckBox
+                      {...{
+                        checked: column.getIsVisible(),
+                        onChange: column.getToggleVisibilityHandler(),
+                        disabled: !CD.enableHiding,
+                        label: string
+                      }}
+                    />
+                    <div>
+                      <SVGBTN
+                        direction="up"
+                        onClick={() => {
+                          rearrangeColumns(targetID, "up");
+
+                        }} />
+                      <SVGBTN
+                        direction="down"
+                        onClick={() => {
+                          rearrangeColumns(targetID, "down");
+                        }} />
+                    </div>
                   </div>)
               })}
-
             </div>
           }
         </Dropdown>
-
-        {/* 
-        {columnAttributePopup &&
-          <div className="columnAttribute" >
-
-            <div className="onecheckColumn">
-              <label>
-                <input
-                  {...{
-                    type: 'checkbox',
-                    checked: table.getIsAllColumnsVisible(),
-                    onChange: table.getToggleAllColumnsVisibilityHandler(),
-                  }}
-                />{' '}
-                전체토글
-              </label>
-            </div>
-            {table.getAllLeafColumns().map(column => {
-              // console.log("column", column)
-              // column.setFilterValue("소")
-              const CD: any = column.columnDef;
-              const string = CD.Header ? CD.Header : column.id;
-              return (
-                <div key={column.id} className="onecheckColumn">
-                  <label>
-                    <input
-                      {...{
-                        type: 'checkbox',
-                        checked: column.getIsVisible(),
-                        onChange: column.getToggleVisibilityHandler(),
-                        disabled: !CD.enableHiding
-                      }}
-                    />{' '}
-                    {string}
-                  </label>
-                </div>)
-            })}
-
-          </div>
-        } */}
       </div>
       {/* 툴바끝 */}
 
@@ -630,11 +642,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps>((props, ref) => {
 
 
 
-      <div>{table.getPrePaginationRowModel().rows.length} Rows</div>
-
-
-
-
+      {/* <div>{table.getPrePaginationRowModel().rows.length} Rows</div> */}
 
       {/* <div>
           <button onClick={() => rerender()}>Force Rerender</button>

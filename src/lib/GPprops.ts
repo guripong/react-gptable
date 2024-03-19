@@ -35,7 +35,7 @@ interface GPtableProps {
             globalfilter?: boolean;
             defaultToolbar?: boolean;
             columnAttributeButton?: boolean;
-            toolbar?: () => JSX.Element;
+            render?: () => JSX.Element;
         }
     }
 }// 컬럼의 타입 정의

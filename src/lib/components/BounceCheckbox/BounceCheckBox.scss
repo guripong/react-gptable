@@ -1,0 +1,123 @@
+.BounceCheckBox {
+  --background: #fff;
+  --border: #d1d6ee;
+  --border-hover: #bbc1e1;
+  --border-active: #145894;
+  --tick: #fff;
+  position: relative;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  /*width:100%; */
+  width: auto;
+  background-color: transparent;
+  font-size:1rem;
+  width:100%;
+  flex:1;
+  label {
+    margin-left: 3px;
+    height: 21px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    &:not(.disabled):hover {
+      color: orange;
+      cursor: pointer;
+    }
+  
+
+    &.disabled{
+      text-decoration: line-through;
+      &:hover{
+        cursor:not-allowed;
+        color:red;
+      }
+    }
+  }
+
+  input,
+  svg {
+    width: 21px;
+    height: 21px;
+    display: block;
+  }
+
+  input {
+    
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    position: relative;
+    outline: none;
+    /*background: var(--background);*/
+    background: white;
+    border: none;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: box-shadow 0.3s;
+    box-shadow: inset 0 0 0 var(--s, 1px) var(--b, var(--border));
+    &:hover {
+      --s: 2px;
+      --b: var(--border-hover);
+    }
+
+    &:checked {
+      /*--b: var(--border-active); */
+      --b: orange;
+    }
+
+    &.disabled{
+      opacity: .6;
+      &:hover{
+        cursor:not-allowed;
+      }
+    }
+  }
+  svg {
+    pointer-events: none;
+    fill: none;
+    stroke-width: 2px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    /*stroke: var(--stroke, var(--border-active)); */
+    stroke: var(--stroke, var(--border-active));
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    bottom: 0;
+    margin-top: auto;
+    margin-bottom: auto;
+    width: 21px;
+    height: 21px;
+    transform: scale(var(--scale, 1)) translateZ(0);
+  }
+
+  &.bounce {
+    --stroke: var(--tick);
+    input {
+      &:checked {
+        --s: 11px;
+        & + svg {
+          animation: bounce11 0.2s linear forwards 0.1s;
+        }
+      }
+    }
+    svg {
+      --scale: 0;
+    }
+  }
+}
+
+@keyframes bounce11 {
+  50% {
+    transform: scale(1.2);
+  }
+  75% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

@@ -1,7 +1,7 @@
 import React from "react"
 
 // A debounced input react component
-export function DebouncedInput({
+function DebouncedInput({
   value: initialValue,
   onChange,
   debounce = 200,
@@ -28,3 +28,4 @@ export function DebouncedInput({
     <input {...props} value={value} onChange={e => setValue(e.target.value)} />
   )
 }
+export default DebouncedInput;

@@ -1,106 +1,124 @@
-$table-border-color:lightgray;
-$main-color:#145894;
-.GP_table {
-    width:100%;
+$table-border-color: lightgray;
+$hover-color: rgb(70, 70, 70);
 
-    .gp_input{
+.GP_table {
+    width: 100%;
+    box-sizing: border-box;
+
+    .gp_input {
         box-sizing: border-box;
-        font-family:Arial, FontAwesome;
-        width:100%;
+        font-family: Arial, FontAwesome;
+        width: 100%;
         // min-width:100px;
         box-sizing: border-box;
-        height:35px;
-        border:none;
-        outline:none;
-        border:1px solid rgb(200,200,200);
+        height: 35px;
+        border: none;
+        outline: none;
+        border: 1px solid rgb(200, 200, 200);
         border-radius: 4px;
-        padding:4px;
-        padding-left:7px;
+        padding: 4px;
+        padding-left: 7px;
     }
 
 
-    .pagination{
+    .pagination {
         box-sizing: border-box;
-        min-height:50px;
-        width:100%;
-        border:1px solid rgb(236, 231, 231);
-        border-top:none;
-        display:flex;
-        flex-flow:row wrap;
+        min-height: 50px;
+        width: 100%;
+        border: 1px solid rgb(236, 231, 231);
+        border-top: none;
+        display: flex;
+        flex-flow: row wrap;
         align-content: space-between;
         justify-content: center;
-        padding:2px;
+        padding: 2px;
+
         .prev,
-        .next{
-            height:46px;
-            width:23%;
-            min-width:100px;
-            border:none;
-            outline:none;
-            background-color:gray;
-            color:white;
+        .next {
+            height: 46px;
+            width: 23%;
+            min-width: 100px;
+            border: none;
+            outline: none;
+            background-color: gray;
+            color: white;
             border-radius: 4px;
             text-align: center;
 
-            &:hover:not([disabled]){
-                background-color: $main-color;
-                cursor:pointer;
+            &:hover:not([disabled]) {
+                background-color: $hover-color;
+                cursor: pointer;
             }
-            &:disabled{
+
+            &:disabled {
                 opacity: 0.7;
-                &:hover{
-                    cursor:not-allowed;
+
+                &:hover {
+                    cursor: not-allowed;
                 }
             }
         }
-        .middle{
-            height:46px;
-            width:40%;
-            min-width:250px;
-            display:flex;
+
+        .middle {
+            height: 46px;
+            width: 40%;
+            min-width: 250px;
+            display: flex;
             justify-content: center;
             align-items: center;
 
-            .nowPage{
-                height:35px;
-                width:50px;
-                border:1px solid rgb(200,200,200);
-                border-radius:4px;
-                outline:none;
+            .nowPage {
+                height: 35px;
+                width: 50px;
+                border: 1px solid rgb(200, 200, 200);
+                border-radius: 4px;
+                outline: none;
                 text-align: center;
-                box-sizing: border-box;               
+                box-sizing: border-box;
             }
+
             input::-webkit-outer-spin-button,
             input::-webkit-inner-spin-button {
                 -webkit-appearance: none;
                 margin: 0;
             }
+
             input[type=number] {
                 -moz-appearance: textfield;
-              }
-            .viewRows{
-                height:35px;
-                border:1px solid rgb(200,200,200);
-                border-radius:4px;
-                outline:none;
-                cursor:pointer;
+            }
+
+            .viewRows {
+                height: 35px;
+                border: 1px solid rgb(200, 200, 200);
+                border-radius: 4px;
+                outline: none;
+                cursor: pointer;
                 box-sizing: border-box;
             }
         }
-        
+
     }
 
 
 
-
+    
     // cursor:default;
     .tableToolbar {
         display: flex;
         flex-flow: row wrap;
         align-content: space-between;
         justify-content: flex-end;
-        padding:5px;        
+        padding: 5px;
         box-sizing: border-box;
+        .global-filter{
+            //가장왼쪽배치
+            order: -1; /* 가장 왼쪽에 배치 */
+            margin-right: auto; 
+            margin-top: 5px;
+            margin-left: 10px;
+            margin-bottom: 5px;
+        }
+       
 
         .btn {
             width: 100px;
@@ -125,7 +143,7 @@ $main-color:#145894;
             }
 
             &:hover:not([disabled]) {
-                background-color: rgb(70, 70, 70);
+                background-color: $hover-color;
                 cursor: pointer;
             }
 
@@ -202,36 +220,34 @@ $main-color:#145894;
         }
 
 
-
-
-        .triangle {
-            width: 20px;
-            height: 20px;
-            z-index: 2;
-            transform: rotate(45deg);
-            background-color: white;
-            border-left: 1px solid rgb(200, 200, 200);
-            border-top: 1px solid rgb(200, 200, 200);
-            position: absolute;
-
-        }
-
-        .download-onerow {
-            border-bottom: 1px solid rgb(220, 220, 220);
-            color: #333;
-            height: 40px;
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            padding: 5px;
+        .columnAttribute {
+            width: 150px;
             box-sizing: border-box;
 
-            &:hover {
-                /*background-color:rgb(240,240,240); */
+            .onecheckColumn {
 
-                color: #145894;
-                cursor: pointer;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                // border:1px solid red;
+                font-size: 1rem;
+                margin: 0px 0px 8px 0px; //왼 우 아래 위
+                border-bottom: 1px solid lightgray;
+                padding-bottom: 2px;
+                display: flex;
             }
+        }
+
+
+    }
+
+
+
+    .filterWrap {
+        margin: 5px;
+
+        .numberFilter {
+            display: flex;
         }
     }
 
@@ -240,7 +256,7 @@ $main-color:#145894;
         right: 0;
         top: 0;
         height: 100%;
-        width: 5px;
+        width: 6px;
         background: rgba(0, 0, 0, 0.5);
         cursor: col-resize;
         user-select: none;
@@ -248,7 +264,8 @@ $main-color:#145894;
         opacity: 0;
 
         &:hover {
-            opacity: 1;
+            background:red;
+                /* 헤더 요소(.header)에 호버 시 resizer의 opacity를 1로 변경 */
         }
 
         &.isResizing {
@@ -256,12 +273,13 @@ $main-color:#145894;
             opacity: 1;
         }
     }
-    .sortor{
+
+    .sortor {
         position: absolute;
-        right: 10px;
+        right: 2px;
         top: 0px;
-        width:8px;
-        height:100%;
+        width: 4px;
+        height: 100%;
         // background:rgba(0,255,0,0.1);
         display: block;
         /* 블록태그로 만들어준다 */
@@ -275,66 +293,90 @@ $main-color:#145894;
         padding-right: 10px;
 
         background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAQAAADYWf5HAAAAkElEQVQoz7X QMQ5AQBCF4dWQSJxC5wwax1Cq1e7BAdxD5SL+Tq/QCM1oNiJidwox0355mXnG/DrEtIQ6azioNZQxI0ykPhTQIwhCR+BmBYtlK7kLJYwWCcJA9M4qdrZrd8pPjZWPtOqdRQy320YSV17OatFC4euts6z39GYMKRPCTKY9UnPQ6P+GtMRfGtPnBCiqhAeJPmkqAAAAAElFTkSuQmCC");
-        &.asc{
+
+        &.asc {
             background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAYAAAByUDbMAAAAZ0lEQVQ4y2NgGLKgquEuFxBPAGI2ahhWCsS/gDibUoO0gPgxEP8H4ttArEyuQYxAPBdqEAxPBImTY5gjEL9DM+wTENuQahAvEO9DMwiGdwAxOymGJQLxTyD+jgWDxCMZRsEoGAVoAADeemwtPcZI2wAAAABJRU5ErkJggg==");
         }
-        &.desc{
+
+        &.desc {
             background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAYAAAByUDbMAAAAZUlEQVQ4y2NgGAWjYBSggaqGu5FA/BOIv2PBIPFEUgxjB+IdQPwfC94HxLykus4GiD+hGfQOiB3J8SojEE9EM2wuSJzcsFMG4ttQgx4DsRalkZENxL+AuJQaMcsGxBOAmGvopk8AVz1sLZgg0bsAAAAASUVORK5CYII= ");
 
         }
     }
-    .filterWrap{
-        margin:5px;
-        .numberFilter{
-            display:flex;
-        }
-    }
 
-    .tableWrap{
+    .tableWrap {
         overflow-x: auto;
         // width:500px;
-        width:100%;
-        .table{
+        box-sizing: border-box;
+        width: 100%;
+
+        .table {
+            box-sizing: border-box;
+            width: 100%;
             font-size: 1rem;
             // width:auto;
             border: 1px solid $table-border-color;
             border-collapse: collapse;
-            .header{
+
+            .header {
                 position: relative;
                 cursor: pointer;
-                height:30px;
-                font-size:1.2rem;
-                &:hover{
+                height: 30px;
+                font-size: 1.2rem;
+                //resizer가 여기 위치
+                &:hover {
                     // font-size:1.1rem;
-                    color:red;
+                    color: red;
+                    .resizer{
+                        opacity: 1;
+                    }
                 }
             }
             
-            td{
+
           
+
+
+
+            td {
+
                 white-space: nowrap; //줄바꿈금지
-                  
-                border:1px solid $table-border-color;
+
+                border: 1px solid $table-border-color;
                 // text-align: center;
-                padding:5px 10px 5px 10px; // top right bottom left
+                padding: 5px 10px 5px 10px; // top right bottom left
             }
+
             th {
+                height: 40px;
                 white-space: nowrap; //줄바꿈금지
-                border:1px solid $table-border-color;
-                .header{
-                    display:flex;
+                box-sizing: border-box;
+                border: 1px solid $table-border-color;
+
+                .header {
+                    display: flex;
                     justify-content: center;
                     align-items: center;
+
                 }
+
+                .filterWrap {
+
+                    // flex:1;
+                    // display:flex;
+                    // justify-content: center;
+                    // align-items: center;
+                }
+
                 // border: 1px solid red;
                 // border-right: 1px solid lightgray;
                 // padding: 2px 4px;
             }
         }
     }
- 
-    
 
 
-   
+
+
+
 }
