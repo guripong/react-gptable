@@ -276,10 +276,12 @@ $hover-color: rgb(70, 70, 70);
 
     .sortor {
         position: absolute;
-        right: 2px;
-        top: 0px;
-        width: 4px;
-        height: 100%;
+        right:0;
+
+        // background:red;
+        margin-right:6px;
+        height:100%;
+        width:6px;
         // background:rgba(0,255,0,0.1);
         display: block;
         /* 블록태그로 만들어준다 */
@@ -320,13 +322,18 @@ $hover-color: rgb(70, 70, 70);
 
             .header {
                 position: relative;
-                cursor: pointer;
+                cursor: pointer !important;
                 height: 30px;
                 font-size: 1.2rem;
+                .headerText{
+                    flex:1;
+                }
+
+
                 //resizer가 여기 위치
                 &:hover {
                     // font-size:1.1rem;
-                    color: red;
+                    // color: red;
                     .resizer{
                         opacity: 1;
                     }

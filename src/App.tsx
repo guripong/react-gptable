@@ -42,13 +42,13 @@ function App() {
         width: 150,
 
         accessorFn: (row: any) => {
-          return row.firstName + "@"
+          return row.firstName + "@123"
         },//필터가능  //1차랜더값
         cell: (info: any) => {
           const { row, getValue } = info;
           // console.log("허허",row);
           return <div>
-            {getValue() + "#"}
+            {getValue() + "님이십니다"}
           </div>;
         },//필터불가 //2차랜더값
       },
@@ -72,8 +72,9 @@ function App() {
             }}
           />
         ),
-        cell: ({ row }: any) => (
-
+        cell: ({ row }: any) => {
+          
+          return(<div style={{width:"100%",display:"flex",justifyContent:"center",alignContent:"center"}}>
           <IndeterminateCheckbox
             {...{
               checked: row.getIsSelected(),
@@ -81,9 +82,8 @@ function App() {
               indeterminate: row.getIsSomeSelected(),
               onChange: row.getToggleSelectedHandler(),
             }}
-          />
-
-        ),
+          /></div>
+        )},
       },
       {
         useSort: false,
@@ -117,6 +117,13 @@ function App() {
         Header: "나이",
         accessorKey: "age",
         useFilter: true,
+        cell: (info: any) => {
+          const { row, getValue } = info;
+          // console.log("허허",row);
+          return <div>
+            {getValue() + "살"}
+          </div>;
+        },//필터불가 //2차랜더값
         // width: 300,
         // Filter: SelectColumnFilter,
       },
@@ -205,15 +212,39 @@ function App() {
 
         data={data}
         column={column}
+        
+        onClickRow={(e,row,cell)=>{
+          // console.log("클릭row",row);
+          // console.log("클릭cell",cell);
+        }}
 
+        // tableName={"asf"}
+        
         option={{
+          //saveTable:"asf", //잇을때만 저장
+          //저장할때는 width 순서 hide   // sort안하고
+          // selRow:{
+          //    background:"#fff" //default transparent
+          //    checkbox:true // default false
+          // } 
+          // savetableName:"oppa",
+          //컬럼순서 
+          row:{
+            selRowColor:"#fff",
+            selRowBackground:"#0000cd", //1줄선택로우 배경색 default transparent         
+            multipleSelRowCheckbox:true, //다중 선택row default false
+          },
+          column:{
+            resizing:true, //모든컬럼 리사이징 가능여부 default true
+            ordering:true, //모든컬럼 오더링 가능여부 default true
+          },
           pagination: {
-            paginationArr: [2, 3, 10, 50], //default 10,20,30,40
-            // defaultPageSize: 3,  //default = paginationArr[0]
+            paginationArr: [1,2, 3, 10, 50], //default 10,20,30,40
+            defaultPageSize: 2,  //default = paginationArr[0]
           },
           toolbar: {
             globalfilter: true,//default false
-            columnAttributeButton: true,// defaulte true,
+            columnAttributeButton: true,// defaulte false,
             render: () => {
               return (<>
                 <button className="btn btn-green" onClick={()=>{

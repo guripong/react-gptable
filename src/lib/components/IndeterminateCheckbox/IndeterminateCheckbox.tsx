@@ -15,9 +15,10 @@ function IndeterminateCheckbox({
   
     return (
       <input
+        className={className}
         type="checkbox"
         ref={ref}
-        className={className}
+    
         {...rest}
       />
     )
