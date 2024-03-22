@@ -15,6 +15,10 @@
   width:100%;
   flex:1;
   label {
+    // max-width:100%;
+    // white-space: nowrap; //줄바꿈금지
+    // text-overflow: ellipsis;
+    // overflow: hidden;
     margin-left: 3px;
     height: 21px;
     display: flex;
@@ -25,8 +29,7 @@
       color: orange;
       cursor: pointer;
     }
-  
-
+    
     &.disabled{
       text-decoration: line-through;
       &:hover{

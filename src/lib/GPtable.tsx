@@ -1,4 +1,4 @@
-import React, { CSSProperties, Ref, RefAttributes, forwardRef, isValidElement, useCallback, useImperativeHandle, useMemo, useReducer, useRef, useState } from 'react';
+import React, { CSSProperties,  forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useReducer, useRef, useState } from 'react';
 import { GPTableInstance, GPtableProps } from './GPprops';
 import {
   Column,
@@ -59,6 +59,7 @@ import {
 // needed for row & cell level scope DnD setup
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import IndeterminateCheckbox from './components/IndeterminateCheckbox/IndeterminateCheckbox';
 
 
 
@@ -187,21 +188,33 @@ const DraggableTableHeader = ({
   enableResizingColumn : boolean;
   enableOrderingColumn : boolean;
 }) => {
-
-  const { attributes, isDragging, listeners, setNodeRef, transform } = useSortable({ id: header.column.id, });
-
+  const columnDef: any = header.column.columnDef;
+  // const { attributes, isDragging, listeners, setNodeRef, transform } =  useSortable({ id: header.column.id, });
+  // enableOrderingColumn이 true이고, enableOrdering이 true인 경우에만 useSortable 사용
+  const { attributes, isDragging, listeners, setNodeRef, transform } =  
+  enableOrderingColumn && columnDef.enableOrdering !== false ? 
+  useSortable({ id: header.column.id }) : 
+  { attributes: {}, isDragging: false, listeners: {}, setNodeRef: () => {}, transform: { x: 0, y: 0, scaleX: 1, scaleY: 1} };
+  const columnSize =header.column.getSize();
   const style: CSSProperties = {
     opacity: isDragging ? 0.8 : 1,
     position: 'relative',
     transform: CSS.Translate.toString(transform), // translate instead of transform to avoid squishing
     transition: 'width transform 0.2s ease-in-out',
     whiteSpace: 'nowrap',
-    width: header.column.getSize(),
+    width: columnSize,
     zIndex: isDragging ? 1 : 0,
   };
 
-  const columnDef: any = header.column.columnDef;
+  // useEffect(()=>{
+  //   const key = columnDef.accessorKey;
+  //   console.log(`${key}:`,columnSize)
 
+  // },[columnDef,columnSize])
+
+ 
+ 
+  // console.log("columnSizeVars",columnSizeVars)
   //
   //enableOrderingColumn 일때만
   //attributes  listeners 할당
@@ -216,13 +229,15 @@ const DraggableTableHeader = ({
             className: `header`,
           }}
         >
-          <div className="headerText"
+          <div 
+            // className="headerText"
+            className={`${columnDef?.useSort === false ? "headerText" : "headerText sortable"}`}
             onClick={
               columnDef?.useSort === false
                 ? () => { }
                 : header.column.getToggleSortingHandler()
             }
-            {...(enableOrderingColumn ? { ...attributes, ...listeners } : {})}
+            {...(enableOrderingColumn&&columnDef.enableOrdering!==false ? { ...attributes, ...listeners } : {})}
             // {...attributes}
             // {...listeners}
 
@@ -235,6 +250,7 @@ const DraggableTableHeader = ({
           {/* 리사이즈 absolute*/}
           {enableResizingColumn&&header.column.getCanResize() && (
             <div
+              onDoubleClick={()=>header.column.resetSize()}
               onMouseDown={header.getResizeHandler()}
               onTouchStart={header.getResizeHandler()}
               className={`resizer ${header.column.getIsResizing() ? 'isResizing' : ''
@@ -262,9 +278,16 @@ const DragAlongCell = ({ cell, onClick }:
     onClick: (event: React.MouseEvent<HTMLTableCellElement, MouseEvent>) => void;
 
   }) => {
-  const { isDragging, setNodeRef, transform } = useSortable({
-    id: cell.column.id,
-  })
+  const columnDef:any = cell.column.columnDef;
+
+  // const { isDragging, setNodeRef, transform } = useSortable({
+  //   id: cell.column.id,
+  // })
+
+  const { isDragging, setNodeRef, transform } =  columnDef.enableOrdering !== false ? 
+  useSortable({ id: cell.column.id }) : 
+  { isDragging: false,  setNodeRef: () => {}, transform: { x: 0, y: 0, scaleX: 1, scaleY: 1} };
+
 
   const style: CSSProperties = {
     opacity: isDragging ? 0.8 : 1,
@@ -312,6 +335,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     // defaultToolbar,
     onClickRow,
     option = {
+      autoSavetableName:null,
       row:{
         selRowColor:"#000",
         selRowBackground:"#fff", //1줄선택로우 배경색 default transparent         
@@ -328,17 +352,18 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
         render: null,
       }
     },
-
   } = props;
 
   const rerender = useReducer(() => ({}), {})[1];
 
+
+  
   //툴바 옵션들
   //다운로드 버튼 툴바 옵션 추가할것.
   const globalfilter = option?.toolbar?.globalfilter ?? false;
   const columnAttributeButton = option?.toolbar?.columnAttributeButton;
-  const toolbarRender = isValidElement(option?.toolbar?.render) ? option.toolbar.render : null;
-  
+  const toolbarRender = (option?.toolbar?.render) ? option.toolbar.render : null;
+  // console.log("toolbarRender",typeof option?.toolbar?.render)
   //pagination 옵션들
   const pagination = option?.pagination || null;
   const paginationArr = (pagination?.paginationArr && Array.isArray(pagination.paginationArr)) ? pagination.paginationArr : [10, 20, 30, 40];
@@ -353,17 +378,56 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
   const selRowColor = option?.row?.selRowColor ?? "#000";
   const multipleSelRowCheckbox = option?.row?.multipleSelRowCheckbox ?? false;
 
+  //테이블 자동저장옵션
+  const autoSavetableName = option?.autoSavetableName;
+
 
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState('');
   const gpTableWrapRef = useRef<HTMLDivElement>(null);
   const [selectedRow, setSelectedRow] = useState(null);
   const [columnOrder, setColumnOrder] = React.useState<string[]>([])
+  const [showColumnAttribute, set_showColumnAttribute] = useState<boolean>(false);
+  const [columnVisibility, setColumnVisibility] = useState<any>({})
+  const [columnSizing,setColumnSizing] = useState<any>({});
+
+
   const columns = useMemo<ColumnDef<any, any>[]>(() => {
     // const columns = useMemo<any[]>(() => {
+
     const newColumns = [];
     if(multipleSelRowCheckbox){
-
+      newColumns.push({
+        Header:"다중선택",
+        useFilter:false, //default false
+        useSort: false, // default true
+        enableHiding: false,// 디폴트true 
+        enableResizing: false,// default true
+        enableOrdering:false, //default true
+        size: 20,
+        accessorKey: "multipleSelectRowCheckBox",
+        header: ({ table }: any) => (
+          <IndeterminateCheckbox
+            {...{
+              checked: table.getIsAllRowsSelected(),
+              indeterminate: table.getIsSomeRowsSelected(),
+              onChange: table.getToggleAllRowsSelectedHandler(),
+            }}
+          />
+        ),
+        cell: ({ row }: any) => {
+          
+          return(<div style={{width:"100%",display:"flex",justifyContent:"center",alignContent:"center"}}>
+          <IndeterminateCheckbox
+            {...{
+              checked: row.getIsSelected(),
+              disabled: !row.getCanSelect(),
+              indeterminate: row.getIsSomeSelected(),
+              onChange: row.getToggleSelectedHandler(),
+            }}
+          /></div>
+        )},
+      })
     }
     
     for (let i = 0; i < icolumn.length; i++) {
@@ -392,6 +456,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
         obj.minSize = oneColumn.minWidth;
       }
 
+      
       obj.enableHiding = oneColumn.enableHiding !== undefined ? oneColumn.enableHiding : true
       newColumns.push(obj);
 
@@ -409,17 +474,40 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
       // console.log("oneColumn",oneColumn)
       if (oneColumn.show === false) {
         obj[oneColumn.accessorKey] = false;
+        
       }
       else {
         obj[oneColumn.accessorKey] = true;
       }
     }
+    if(multipleSelRowCheckbox){
+      obj.multipleSelRowCheckbox = true;
+    }
+     setColumnVisibility(obj);
     return obj;
-  }, [icolumn])
+  }, [icolumn,multipleSelRowCheckbox])
 
+  const initColumSizing = useMemo(() => {
+    let obj: any = {
+    };
+    for (let i = 0; i < icolumn.length; i++) {
+      const oneColumn: any = icolumn[i];
+      // console.log("oneColumn",oneColumn)
+      if (oneColumn.width) {
+        obj[oneColumn.accessorKey] = oneColumn.width;
+        
+      }
+      else{
+        obj[oneColumn.accessorKey] = 150;
+      }
+    }
+    if(multipleSelRowCheckbox){
+      obj.multipleSelRowCheckbox= 20;
+    }
+    setColumnSizing(obj);
+    return obj;
+  }, [icolumn,multipleSelRowCheckbox])
 
-
-  // console.log("columnOrder",columnOrder)
 
 
   const table = useReactTable({
@@ -428,17 +516,24 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     filterFns: {
       fuzzy: fuzzyFilter,
     },
+    defaultColumn:{
+      // size:300,
+      minSize:50,
+      // maxSize:500,
+    },
     state: {
       columnFilters,
       globalFilter,
       columnOrder,
+      columnVisibility,
+      columnSizing,
     },
     initialState: {
       pagination: {
         pageSize: pagination ? defaultPageSize : data.length,
         pageIndex: 0,
       },
-
+      columnSizing:initColumSizing,
       // columnOrder: ['age', 'firstName', 'lastName'], //customize the initial column order
       columnVisibility: initColumVisibility,
       // expanded: true, //expand all rows by default
@@ -452,9 +547,10 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
 
       
     },
+    onColumnSizingChange:setColumnSizing,
+    onColumnVisibilityChange:setColumnVisibility,
     onColumnOrderChange: setColumnOrder,
     onColumnFiltersChange: setColumnFilters,
-    // onPaginationChange:
     onGlobalFilterChange: setGlobalFilter,
     globalFilterFn: fuzzyFilter,
     enableColumnResizing: true,
@@ -471,6 +567,33 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     debugColumns: false,
   });
 
+  useEffect(()=>{
+    if(autoSavetableName){
+      //저장할것
+      // console.log("columnOrder",columnOrder)
+      // console.log("columnVisibility",columnVisibility)
+      // console.log("columnSizing",columnSizing)
+      const saveInformation=[];
+      for(let i = 0 ; i <columnOrder.length ;i++){
+        const key = columnOrder[i];
+        const show = columnVisibility[key];
+        const size = columnSizing[key];
+        saveInformation.push({
+          key:key,
+          show:show,
+          size:size
+        });
+      }
+      localStorage.setItem("GP_"+autoSavetableName,JSON.stringify(saveInformation));
+      console.log("saveInformation",saveInformation)
+      // let a = table.getState().columnSizing;
+      // console.log("a",a);
+
+    }
+   
+  },[columnOrder,columnVisibility,columnSizing,table,autoSavetableName])
+  
+   
 
 
   useImperativeHandle(ref, () => {
@@ -490,17 +613,17 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
       forceRerender: () => {
         rerender();
       },
-      set_columnOrder: (newOrder) => {
-        table.setColumnOrder(newOrder);
-      },
-      get_columnOrder: () => {
-        return table.getAllLeafColumns();
-      }
+      // set_columnOrder: (newOrder) => {
+      //   table.setColumnOrder(newOrder);
+      // },
+      // get_columnOrder: () => {
+      //   return table.getAllLeafColumns();
+      // }
     }
   }, [table]);
 
 
-  const [showColumnAttribute, set_showColumnAttribute] = useState(false);
+
 
   const rearrangeColumns = useCallback((targetId: string, direction: string) => {
     const allColumns = table.getAllLeafColumns();
@@ -553,6 +676,19 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     useSensor(TouchSensor, {}),
     useSensor(KeyboardSensor, {})
   )
+
+   // const columnSizeVars = React.useMemo(() => {
+  //   const headers = table.getFlatHeaders()
+  //   const colSizes: { [key: string]: number } = {}
+  //   for (let i = 0; i < headers.length; i++) {
+  //     const header = headers[i]!
+  //     // colSizes[`--header-${header.id}-size`] = header.getSize()
+  //     colSizes[`${header.column.id}`] = header.column.getSize()
+  //   }
+  //   console.log("colSizes",colSizes)
+  //   return colSizes
+  // }, [table.getState().columnSizingInfo])
+
 
   // console.log("랜더")
   return (
@@ -618,6 +754,9 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
                     const CD: any = column.columnDef;
                     const string = CD.Header ? CD.Header : column.id;
                     const targetID = column.id;
+                    // if(CD.enableOrdering===false){
+                    //   return null;
+                    // }
 
                     return (
                       <div key={column.id} className="onecheckColumn">
@@ -629,7 +768,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
                             label: string
                           }}
                         />
-                        {enableOrderingColumn &&
+                        {enableOrderingColumn &&CD.enableOrdering!==false&&
                           <div>
                             <SVGBTN
                               direction="up"
@@ -661,7 +800,8 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
         <div className="tableWrap">
           <table className="table"
             style={{
-              width: table.getTotalSize(),
+              // width: table.getTotalSize(),
+              width: table.getCenterTotalSize(),
               minWidth: "100%"
             }}
           >
@@ -689,10 +829,11 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
             <tbody>
               {table.getRowModel().rows.map(row => {
                 const isSelRow = row.original===selectedRow;
-
+                // console.log("row",row)
                 return (
                   <tr key={row.id}style={{background:isSelRow?selRowBackground:"",color:isSelRow?selRowColor:""}}>
                     {row.getVisibleCells().map(cell => {
+                      // console.log("cell",cell)
                       return (
                         <SortableContext
                           key={cell.id}

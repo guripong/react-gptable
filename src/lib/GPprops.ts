@@ -8,13 +8,13 @@ interface GPTableInstance {
     * @param value 입력으로 받는 숫자
     * @returns 1을 더한 값
     */
-    test: (value: number) => number;
-    power: () => string;
+    test?: (value: number) => number;
+    power?: () => string;
     getGPtableElementRef: () => HTMLDivElement | null;
     getTable: () => ReturnType<typeof useReactTable>;
     forceRerender: () => void;
-    set_columnOrder: ([]:Array<any>) => void;
-    get_columnOrder: () => any;
+    set_columnOrder?: ([]:Array<any>) => void;
+    get_columnOrder?: () => any;
 }
 
 
@@ -60,6 +60,7 @@ interface GPtableProps<T> {
     *       - render: 툴바를 렌더링하는 함수입니다.
     **/
     option?: {
+        autoSavetableName?:string;
         row?:{
             selRowColor?:string;
             selRowBackground?:string;

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { GPTableInstance, GPtable, isOdd ,IndeterminateCheckbox} from './lib';
-// import { GPTableInstance } from 'lib';
 import "./App.scss"
 
 type Person = {
@@ -8,7 +7,6 @@ type Person = {
   lastName: string
   age?: number
   subRows?: Person[]
-  mycheckbox?: any
   mycheckbox2?: boolean | any
   something?: any
 }
@@ -25,14 +23,23 @@ function App() {
   const column = useMemo(() => {
     return [
       {
+        Header:"resize,sort,ordering불가",
         accessorKey: "data_idx", //key name
-        enableResizing: false,// default true
-        useSort: false // default true
+        useSort: false, // default true
+        useFilter:false, // default false
 
+        enableResizing: false,// default true
+        enableOrdering:false, // default true
+        enableHiding: true, //default true
+      
+      },
+      {
+        Header:"가능.................",
+        accessorKey: "data_idx2", //key name
       },
       {
         useSort: true, //default true
-        useFilter: true, //deafault true
+        useFilter: true, //deafault false
         enableHiding: false,// 디폴트true 
         enableResizing: true,// default true
 
@@ -40,7 +47,6 @@ function App() {
         accessorKey: "firstName", //key name
         // minWidth:44, //최소 컬럼넓이
         width: 150,
-
         accessorFn: (row: any) => {
           return row.firstName + "@123"
         },//필터가능  //1차랜더값
@@ -48,7 +54,7 @@ function App() {
           const { row, getValue } = info;
           // console.log("허허",row);
           return <div>
-            {getValue() + "님이십니다"}
+            {getValue() + "님"}
           </div>;
         },//필터불가 //2차랜더값
       },
@@ -60,38 +66,11 @@ function App() {
       },
       {
         useSort: false,
-        width: 20,
-        accessorKey: "mycheckbox",
-        type: "checkbox",
-        header: ({ table }: any) => (
-          <IndeterminateCheckbox
-            {...{
-              checked: table.getIsAllRowsSelected(),
-              indeterminate: table.getIsSomeRowsSelected(),
-              onChange: table.getToggleAllRowsSelectedHandler(),
-            }}
-          />
-        ),
-        cell: ({ row }: any) => {
-          
-          return(<div style={{width:"100%",display:"flex",justifyContent:"center",alignContent:"center"}}>
-          <IndeterminateCheckbox
-            {...{
-              checked: row.getIsSelected(),
-              disabled: !row.getCanSelect(),
-              indeterminate: row.getIsSomeSelected(),
-              onChange: row.getToggleSelectedHandler(),
-            }}
-          /></div>
-        )},
-      },
-      {
-        useSort: false,
         width: 150,
         accessorKey: "mycheckbox2",
         Header: "어떤값",
         header: ({ table }: any) => {
-          return <>체크시 실제값이 바뀜</>
+          return <>체크시 실제값이 바뀜 custom rendering</>
         },
         cell: ({ row }: any) => {
           return (
@@ -114,6 +93,7 @@ function App() {
         },
       },
       {
+        width:300,
         Header: "나이",
         accessorKey: "age",
         useFilter: true,
@@ -181,8 +161,6 @@ function App() {
   }]);
 
 
-
-
   const gptableRef = useRef<GPTableInstance>(null);
 
   useEffect(() => {
@@ -223,11 +201,7 @@ function App() {
         option={{
           //saveTable:"asf", //잇을때만 저장
           //저장할때는 width 순서 hide   // sort안하고
-          // selRow:{
-          //    background:"#fff" //default transparent
-          //    checkbox:true // default false
-          // } 
-          // savetableName:"oppa",
+          autoSavetableName:"oppa",
           //컬럼순서 
           row:{
             selRowColor:"#fff",
@@ -248,9 +222,32 @@ function App() {
             render: () => {
               return (<>
                 <button className="btn btn-green" onClick={()=>{
-                  console.log("새로고친후 체크값들 기억")
+                  console.log("새로고친후 체크값들 기억X")
+                  setData([
+                    {
+                    firstName: "소",
+                    lastName: "기영",
+                    age: 24,
+                    mycheckbox2: 1,
+                    something: 1,
+                  }, 
+                  {
+                    firstName: "박",
+                    lastName: "서하",
+                    age: -5,
+                  }, 
+                  {
+                    firstName: "류",
+                    lastName: "기정",
+                    age: 14,
+                
+                  }, {
+                    firstName: "정",
+                    lastName: "연광",
+                    age: 3,
+                  }])
                 }}>새로고침</button>
-                <button className="btn btn-orange" disabled={true}>테이블저장</button>
+                {/* <button className="btn btn-orange" disabled={true}>테이블저장</button> */}
               </>)
             }
           }

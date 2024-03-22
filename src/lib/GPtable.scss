@@ -221,17 +221,17 @@ $hover-color: rgb(70, 70, 70);
 
 
         .columnAttribute {
-            width: 150px;
+            // width: 150px;
             box-sizing: border-box;
 
             .onecheckColumn {
-
+                height:30px;
                 white-space: nowrap;
                 text-overflow: ellipsis;
                 overflow: hidden;
                 // border:1px solid red;
                 font-size: 1rem;
-                margin: 0px 0px 8px 0px; //왼 우 아래 위
+                // margin: 2px 0px 1px 0px; //왼 우 아래 위
                 border-bottom: 1px solid lightgray;
                 padding-bottom: 2px;
                 display: flex;
@@ -320,64 +320,49 @@ $hover-color: rgb(70, 70, 70);
             border: 1px solid $table-border-color;
             border-collapse: collapse;
 
-            .header {
-                position: relative;
-                cursor: pointer !important;
-                height: 30px;
-                font-size: 1.2rem;
-                .headerText{
-                    flex:1;
-                }
-
-
-                //resizer가 여기 위치
-                &:hover {
-                    // font-size:1.1rem;
-                    // color: red;
-                    .resizer{
-                        opacity: 1;
-                    }
-                }
-            }
-            
-
-          
-
-
-
             td {
-
                 white-space: nowrap; //줄바꿈금지
-
                 border: 1px solid $table-border-color;
                 // text-align: center;
                 padding: 5px 10px 5px 10px; // top right bottom left
             }
 
+
             th {
                 height: 40px;
-                white-space: nowrap; //줄바꿈금지
                 box-sizing: border-box;
                 border: 1px solid $table-border-color;
-
                 .header {
-                    display: flex;
+                    flex: 1; /* 남은 공간을 모두 차지하도록 설정 */
+                    display:flex;
                     justify-content: center;
                     align-items: center;
+                    position: relative;
+                  
+                    font-size: 1.2rem;
+                    .headerText{
+                        height:100%;
+                        width:100%;
+                        &.sortable{
+                            cursor: pointer !important;
+                        }
 
+                    }
+                    //resizer가 여기 위치
+                    &:hover {
+                        // font-size:1.1rem;
+                        // color: red;
+                        .resizer{
+                            opacity: 1;
+                        }
+                    }
                 }
-
                 .filterWrap {
-
-                    // flex:1;
-                    // display:flex;
-                    // justify-content: center;
-                    // align-items: center;
+                    display:flex;
+                    justify-content: center;
+                    align-items: center;
                 }
 
-                // border: 1px solid red;
-                // border-right: 1px solid lightgray;
-                // padding: 2px 4px;
             }
         }
     }

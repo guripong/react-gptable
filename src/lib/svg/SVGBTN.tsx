@@ -25,24 +25,18 @@ const SVGBtn = styled.div<SVGBtnProps>`
     border: 1px solid gray;
     box-sizing: border-box;
     justify-content: center;
-    // margin: 1px;
-    // margin-right: 4px;
-    // cursor: pointer;
+
     &:hover {
         // cursor: pointer !important;
         // background: red;
     }
 `;
 
+// styled-components에서 'degree' prop을 사용하지 않도록 설정
 const StyledSVG = styled.svg<StyledSVGProps>`
     width: 80%;
     fill: currentColor;
     transform: ${({ degree }) => `rotate(${degree})`};
-
-    polygon:hover {
-        // fill: blue; // 원하는 hover 효과 스타일 지정
-        // cursor:pointer;
-    }
 `;
 
 const SVGBTN: React.FC<SVGBTNProps> = ({ onClick, direction, ...props }) => {
@@ -56,6 +50,7 @@ const SVGBTN: React.FC<SVGBTNProps> = ({ onClick, direction, ...props }) => {
 
     return (
         <SVGBtn {...props} onClick={onClick}>
+            {/* degree prop을 사용하지 않도록 수정 */}
             <StyledSVG degree={degree} viewBox="0 0 255 255">
                 <polygon points="0,63.75 127.5,191.25 255,63.75" />
             </StyledSVG>
