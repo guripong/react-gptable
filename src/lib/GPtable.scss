@@ -248,6 +248,8 @@ $hover-color: rgb(70, 70, 70);
 
         .numberFilter {
             display: flex;
+            justify-content: center;
+            align-items: center;
         }
     }
 
@@ -257,20 +259,21 @@ $hover-color: rgb(70, 70, 70);
         top: 0;
         height: 100%;
         width: 6px;
-        background: rgba(0, 0, 0, 0.5);
+        background: lightgray;
         cursor: col-resize;
         user-select: none;
         touch-action: none;
         opacity: 0;
 
         &:hover {
-            background:red;
+            background:gray;
                 /* 헤더 요소(.header)에 호버 시 resizer의 opacity를 1로 변경 */
         }
 
         &.isResizing {
-            background: blue;
+            background: gray;
             opacity: 1;
+            height:100%;
         }
     }
 
@@ -286,7 +289,7 @@ $hover-color: rgb(70, 70, 70);
         display: block;
         /* 블록태그로 만들어준다 */
         overflow: hidden;
-        white-space: nowrap;
+        // white-space: nowrap;
         /*글자를 한줄로 모아준다*/
         text-overflow: ellipsis;
         /*height:50%; */
@@ -314,39 +317,47 @@ $hover-color: rgb(70, 70, 70);
 
         .table {
             box-sizing: border-box;
+            margin:0;
+            padding:0;
             width: 100%;
             font-size: 1rem;
             // width:auto;
             border: 1px solid $table-border-color;
             border-collapse: collapse;
-
-            td {
-                white-space: nowrap; //줄바꿈금지
-                border: 1px solid $table-border-color;
-                // text-align: center;
-                padding: 5px 10px 5px 10px; // top right bottom left
-            }
-
-
             th {
-                height: 40px;
+                // white-space:nowrap; text-overflow:ellipsis; overflow:hidden;
+                // height: 40px;
                 box-sizing: border-box;
                 border: 1px solid $table-border-color;
+                // padding: 5px 10px 5px 10px; // top right bottom left
                 .header {
+                    // margin:5px;
+                    height:40px;
+                    width:100%;
                     flex: 1; /* 남은 공간을 모두 차지하도록 설정 */
                     display:flex;
                     justify-content: center;
                     align-items: center;
                     position: relative;
-                  
-                    font-size: 1.2rem;
+                    // min-width:0;
+                    font-size: 1rem;
+                    // line-height: 1.2rem;
                     .headerText{
-                        height:100%;
-                        width:100%;
+      
+                
+                        white-space: nowrap;
+                        text-overflow: ellipsis;
+                        overflow: hidden;
+                        // &:hover{
+                        //     text-overflow: clip;
+                        //     white-space: normal;
+                        //     word-break: break-all;
+                        // }
                         &.sortable{
+                            padding-left:20px;
+                            padding-right:20px;
                             cursor: pointer !important;
                         }
-
                     }
                     //resizer가 여기 위치
                     &:hover {
@@ -364,6 +375,56 @@ $hover-color: rgb(70, 70, 70);
                 }
 
             }
+            td {
+                // white-space:nowrap; text-overflow:ellipsis; overflow:hidden;
+                height: 40px;
+                // white-space: nowrap; //줄바꿈금지
+                border: 1px solid $table-border-color;
+                // margin:5px;
+                // text-align: center;
+                font-size: 0.95rem;
+                .cell{
+                    width:100%;
+                    // padding: 5px 10px 5px 10px; // top right bottom left
+                    // margin:5px;
+                    // white-space: normal;
+
+                    flex: 1; /* 남은 공간을 모두 차지하도록 설정 */
+                    display:flex;
+                    justify-content: center;
+                    align-items: center;
+                    position: relative;
+                    // min-width:0;
+                    .cellText{
+                        white-space: nowrap;
+                        text-overflow: ellipsis;
+                        overflow: hidden;
+                        div{
+                
+                            white-space: nowrap;
+                            text-overflow: ellipsis;
+                            overflow: hidden;
+                            // &:hover{
+                            //     text-overflow: clip;
+                            //     white-space: normal;
+                            //     word-break: break-all;
+                            // }
+                  
+                            // &:hover {
+                             
+                            //     white-space: normal; /* 호버 시 줄임표 없이 전체 텍스트 표시 */
+                            //     overflow: auto; /* 필요한 경우 스크롤바 표시 */
+                            //   }
+    
+                        }
+                    }
+                  
+
+                }
+            }
+
+
+         
         }
     }
 

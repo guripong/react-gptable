@@ -1,20 +1,11 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 interface SVGBTNProps {
     onClick: () => void;
     direction?: string;
 }
-
-interface SVGBtnProps {
-    direction?: string;
-}
-
-interface StyledSVGProps {
-    degree: string;
-}
-
-const SVGBtn = styled.div<SVGBtnProps>`
+const SVGBtn = styled.div<SVGBTNProps>`
     width: 15px;
     height: 15px;
     background-color: transparent;
@@ -27,33 +18,26 @@ const SVGBtn = styled.div<SVGBtnProps>`
     justify-content: center;
 
     &:hover {
-        // cursor: pointer !important;
-        // background: red;
+        &, * {
+            cursor: pointer !important;
+  
+            fill:lightgray;
+        }
     }
 `;
 
-// styled-components에서 'degree' prop을 사용하지 않도록 설정
-const StyledSVG = styled.svg<StyledSVGProps>`
-    width: 80%;
-    fill: currentColor;
-    transform: ${({ degree }) => `rotate(${degree})`};
-`;
-
 const SVGBTN: React.FC<SVGBTNProps> = ({ onClick, direction, ...props }) => {
-    const degree = useMemo(() => {
-        if (direction === 'up') {
-            return '180deg';
-        } else {
-            return '0deg';
-        }
-    }, [direction]);
-
     return (
         <SVGBtn {...props} onClick={onClick}>
             {/* degree prop을 사용하지 않도록 수정 */}
-            <StyledSVG degree={degree} viewBox="0 0 255 255">
+            <svg 
+                style={{
+                    width:'80%',
+                    transform:`rotate(${direction === 'up' ? '180deg' : '0deg'})`
+                }}
+                fill="currentColor"viewBox="0 0 255 255">
                 <polygon points="0,63.75 127.5,191.25 255,63.75" />
-            </StyledSVG>
+            </svg>
         </SVGBtn>
     );
 };

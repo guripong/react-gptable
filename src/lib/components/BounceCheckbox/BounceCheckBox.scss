@@ -32,8 +32,8 @@
     
     &.disabled{
       text-decoration: line-through;
+      cursor:not-allowed !important;
       &:hover{
-        cursor:not-allowed;
         color:red;
       }
     }
@@ -73,9 +73,7 @@
 
     &.disabled{
       opacity: .6;
-      &:hover{
-        cursor:not-allowed;
-      }
+      cursor:not-allowed !important;
     }
   }
   svg {
