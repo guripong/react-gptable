@@ -30,6 +30,7 @@ function App() {
   const column: GPColumn[] = useMemo(() => {
     let originArr: GPColumn[] = [
       {
+        pKey:true,
         Header: "resize,sort,ordering불가",
         accessorKey: "data_idx", //key name
         useSort: false, // default true

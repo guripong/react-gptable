@@ -38,6 +38,10 @@ interface GPTableInstance {
  * @see {@link GPColumn}
  */
 interface GPColumn {
+    /** 
+     *  selection 의 기준이 되는키 기억합니다
+     * **/
+    pKey?: boolean;
     /**
      * 컬럼 헤더에 표시할 텍스트입니다.
      * 생략 시 accessorKey가 대체됩니다.

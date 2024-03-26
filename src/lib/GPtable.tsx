@@ -22,6 +22,7 @@ import {
   CellContext,
   ColumnSort,
   PaginationState,
+  RowSelectionState,
   // FilterFns,
 } from '@tanstack/react-table'
 
@@ -225,15 +226,18 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
 
 
 
-  const [globalFilter, setGlobalFilter] = useState<any>('');
-  const gpTableWrapRef = useRef<HTMLDivElement>(null);
-  const [selectedRow, setSelectedRow] = useState(null);
 
+  const gpTableWrapRef = useRef<HTMLDivElement>(null);
+
+
+  
+  // console.log("rowSelection",rowSelection)
 
   const [pagination, setPagination] = React.useState<PaginationState>({
     pageSize: usePagination ? defaultPageSize ?? 10 : data.length,
     pageIndex: 0,
   })
+  const [globalFilter, setGlobalFilter] = useState<any>('');
 
   const [columnOrder, setColumnOrder] = React.useState<string[]>([])
   const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>({})
@@ -376,7 +380,23 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     return obj;
   }, [icolumn, multipleSelRowCheckbox])
 
-
+  const [rowSelection,setRowSelection] = useState<RowSelectionState>({});
+  const [selectedRows, setSelectedRows] = useState<any[]>([]);//여러줄
+  const [selectedRow, setSelectedRow] = useState(null); //한줄
+  useEffect(() => {
+    const handleSelectionState = (selections: RowSelectionState) => {
+      console.log("selections",selections)
+      setSelectedRows((prev) =>
+        Object.keys(selections).map(
+          (key) =>
+            table.getSelectedRowModel().rowsById[key]?.original ||
+            prev.find((row) => row._id === key),
+        ),
+      );
+    };
+    handleSelectionState(rowSelection);
+  }, [rowSelection]);
+  console.log("selectedRows",selectedRows)
 
   const table = useReactTable({
     data,
@@ -397,7 +417,8 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
       columnVisibility,
       columnSizing,
       sorting,
-      pagination: pagination
+      pagination: pagination,
+      rowSelection
     },
 
     initialState: {
@@ -416,9 +437,8 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
       //     desc: true //sort by age in descending order by default
       //   }
       // ]
-
-
     },
+    onRowSelectionChange:setRowSelection,
     onPaginationChange: setPagination,
     onSortingChange: setSorting, //컬럼소팅
     onColumnSizingChange: setColumnSizing, //컬럼크기
@@ -498,7 +518,8 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     setColumnOrder(order);
 
     setSorting([]);
-
+    setGlobalFilter('');
+    setColumnFilters([]);
     //#@!
     // set_reloadColumn(true);
     // rerender();
@@ -638,7 +659,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
         <div className="tableWrap">
           <table className="table"
             style={{
-              tableLayout: 'fixed',
+              // tableLayout: 'fixed',
               // width: table.getTotalSize(),
               width: table.getCenterTotalSize(),
               minWidth: "100%"
