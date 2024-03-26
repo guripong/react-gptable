@@ -21,6 +21,7 @@ import {
   Cell,
   CellContext,
   ColumnSort,
+  PaginationState,
   // FilterFns,
 } from '@tanstack/react-table'
 
@@ -29,13 +30,10 @@ import {
   rankItem,
   compareItems,
 } from '@tanstack/match-sorter-utils'
+
 import "./GPtable.scss";
 
 import DebouncedInput from './components/DebouncedInput/DebouncedInput';
-import Dropdown from './components/DropDown/DropDown';
-import BounceCheckBox from './components/BounceCheckbox/BounceCheckBox';
-import SVGBTN from './svg/SVGBTN';
-
 
 
 //dnd 사용예시
@@ -67,6 +65,7 @@ import _ from "lodash";
 import { fuzzyFilter } from './filters/filter';
 import { loadTable } from './utils/loadTable';
 import Loading from './components/Loading/Loading';
+import GPtableToolbar from './toolbar/GPtableToolbar';
 
 
 
@@ -171,13 +170,11 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
       // useFilter: true,
     }],
     data: data = [],
-    // defaultPageSize,
-    // defaultToolbar,
     onClickRow,
     option = {
       autoSavetableName: null,
       row: {
-        rememberSelRow:true,
+        rememberSelRow: true,
         selRowColor: "#000",
         selRowBackground: "#fff", //1줄선택로우 배경색 default transparent         
         multipleSelRowCheckbox: false, //다중 선택row default false
@@ -195,7 +192,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     },
   } = props;
 
-  const [beforeload_column_initial] = useState(beforeload_column);
+  const [beforeload_column_initial] = useState<GPColumn[]>(JSON.parse(JSON.stringify(beforeload_column)));
 
   const rerender = useReducer(() => ({}), {})[1];
 
@@ -205,12 +202,13 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
   //다운로드 버튼 툴바 옵션 추가할것.
   const globalfilter = option?.toolbar?.globalfilter ?? false;
   const columnAttributeButton = option?.toolbar?.columnAttributeButton;
-  const toolbarRender = (option?.toolbar?.render) ? option.toolbar.render : null;
+  const toolbarRender = option?.toolbar?.render;
+
   // console.log("toolbarRender",typeof option?.toolbar?.render)
   //pagination 옵션들
-  const pagination = option?.pagination || null;
-  const paginationArr = (pagination?.paginationArr && Array.isArray(pagination.paginationArr)) ? pagination.paginationArr : [10, 20, 30, 40];
-  const defaultPageSize = Number.isInteger(pagination?.defaultPageSize) ? pagination?.defaultPageSize : paginationArr[0];
+  const usePagination = option?.pagination || null;
+  const paginationArr = (usePagination?.paginationArr && Array.isArray(usePagination.paginationArr)) ? usePagination.paginationArr : [10, 20, 30, 40];
+  const defaultPageSize = Number.isInteger(usePagination?.defaultPageSize) ? usePagination?.defaultPageSize : paginationArr[0];
 
   //column 옵션들
   const enableResizingColumn = option?.column?.resizing ?? true;
@@ -226,35 +224,38 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
 
 
 
+
   const [globalFilter, setGlobalFilter] = useState<any>('');
   const gpTableWrapRef = useRef<HTMLDivElement>(null);
   const [selectedRow, setSelectedRow] = useState(null);
-  const [showColumnAttribute, set_showColumnAttribute] = useState<boolean>(false);
 
 
+  const [pagination, setPagination] = React.useState<PaginationState>({
+    pageSize: usePagination ? defaultPageSize ?? 10 : data.length,
+    pageIndex: 0,
+  })
 
   const [columnOrder, setColumnOrder] = React.useState<string[]>([])
   const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>({})
   const [columnSizing, setColumnSizing] = useState<Record<string, number>>({});
-  const [sorting,setSorting] = useState<ColumnSort[]>([]);
+  const [sorting, setSorting] = useState<ColumnSort[]>([]);
   //sort remember
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  console.log("sorting",sorting);
+  // console.log("sorting",sorting);
   console.log("columnFilters",columnFilters)
 
-
-  const icolumn = useMemo<GPColumn[]>(()=>{
-    let newLoadedColumn:GPColumn[]=beforeload_column;
-    if(autoSavetableName){
-      try{
-        newLoadedColumn = loadTable(beforeload_column,autoSavetableName);
+  const icolumn = useMemo<GPColumn[]>(() => {
+    let newLoadedColumn: GPColumn[] = beforeload_column;
+    if (autoSavetableName) {
+      try {
+        newLoadedColumn = loadTable(beforeload_column, autoSavetableName);
       }
-      catch(err){
-        console.error("table loading실패",err);
+      catch (err) {
+        console.error("table loading실패", err);
       }
     }
     return newLoadedColumn;
-  },[beforeload_column,autoSavetableName])
+  }, [beforeload_column, autoSavetableName])
 
   const columns = useMemo<ColumnDef<any, any>[]>(() => {
     // const columns = useMemo<any[]>(() => {
@@ -304,8 +305,8 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
       // if(icolumn[i].cell){
       //   obj.cell=icolumn[i].cell ;
       // }
-      if (oneColumn.checkbox) {
-
+      if (oneColumn.sorting) {
+        setSorting(oneColumn.sorting);
       }
 
       if (oneColumn.Header) {
@@ -330,8 +331,8 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     const order = newColumns.map(d => d.accessorKey);
     setColumnOrder(order)
     return newColumns;
-  }, [icolumn, data, multipleSelRowCheckbox])
-  // console.log("columns", columns)
+  }, [icolumn, multipleSelRowCheckbox])
+
 
   const initColumVisibility = useMemo<Record<string, boolean>>(() => {
     let obj: any = {
@@ -383,7 +384,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     filterFns: {
       fuzzy: fuzzyFilter,
     },
-    autoResetAll: false ,
+    autoResetAll: false,
     defaultColumn: {
       // size:300,
       minSize: 50,
@@ -396,13 +397,14 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
       columnVisibility,
       columnSizing,
       sorting,
+      pagination: pagination
     },
 
     initialState: {
-      pagination: {
-        pageSize: pagination ? defaultPageSize : data.length,
-        pageIndex: 0,
-      },
+      // pagination: {
+      //   pageSize: usePagination ? defaultPageSize : data.length,
+      //   pageIndex: 0,
+      // },
       columnSizing: initColumSizing,
       // columnOrder: ['age', 'firstName', 'lastName'], //customize the initial column order
       columnVisibility: initColumVisibility,
@@ -417,10 +419,11 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
 
 
     },
-    onSortingChange:setSorting,
-    onColumnSizingChange: setColumnSizing,
-    onColumnVisibilityChange: setColumnVisibility,
-    onColumnOrderChange: setColumnOrder,
+    onPaginationChange: setPagination,
+    onSortingChange: setSorting, //컬럼소팅
+    onColumnSizingChange: setColumnSizing, //컬럼크기
+    onColumnVisibilityChange: setColumnVisibility, //컬럼visible
+    onColumnOrderChange: setColumnOrder, //컬럼순서바뀜
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
     globalFilterFn: fuzzyFilter,
@@ -442,15 +445,12 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     // table.autoreset
     //
     localStorage.removeItem("GP_" + autoSavetableName);
-
-    console.log("beforeload_column_initial",beforeload_column_initial)
-
-
+    console.log("beforeload_column_initial", beforeload_column_initial)
 
     let obj: any = {
     };
     for (let i = 0; i < beforeload_column_initial.length; i++) {
-      const oneColumn: any = beforeload_column_initial[i];
+      const oneColumn: GPColumn = beforeload_column_initial[i];
       // console.log("oneColumn",oneColumn)
       if (oneColumn.show === false) {
         obj[oneColumn.accessorKey] = false;
@@ -460,18 +460,19 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
         obj[oneColumn.accessorKey] = true;
       }
     }
+
     if (multipleSelRowCheckbox) {
       obj.multipleSelRowCheckbox = true;
     }
-    // console.log("obj",obj)
+    console.log("obj", obj)
     setColumnVisibility(obj);
-    obj=null;
+    obj = null;
 
 
-    obj= {
+    obj = {
     };
     for (let i = 0; i < beforeload_column_initial.length; i++) {
-      const oneColumn: any = beforeload_column_initial[i];
+      const oneColumn: GPColumn = beforeload_column_initial[i];
       // console.log("oneColumn",oneColumn)
       if (oneColumn.width) {
         obj[oneColumn.accessorKey] = oneColumn.width;
@@ -487,27 +488,23 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     setColumnSizing(obj);
 
 
-    
-    obj= {
+    obj = {
     };
 
-    const order=beforeload_column_initial.map(d => d.accessorKey);
-    if(multipleSelRowCheckbox){
+    const order: string[] = beforeload_column_initial.map(d => d.accessorKey);
+    if (multipleSelRowCheckbox) {
       order.unshift("multipleSelRowCheckbox")
     }
     setColumnOrder(order);
 
-
     setSorting([]);
 
     //#@!
-
     // set_reloadColumn(true);
     // rerender();
     // table._autoResetPageIndex()
 
-
-  }, [table, autoSavetableName,beforeload_column_initial ,multipleSelRowCheckbox])
+  }, [table, autoSavetableName, beforeload_column_initial, multipleSelRowCheckbox])
 
 
 
@@ -515,8 +512,8 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     columnOrder: string[],
     columnVisibility: Record<string, boolean>,
     columnSizing: Record<string, number>,
-    sorting:ColumnSort[],
-    columnFilters:ColumnFiltersState,
+    sorting: ColumnSort[],
+    columnFilters: ColumnFiltersState,
   ) => {
     if (autoSavetableName) {
       // console.log("autoSavetableName",autoSavetableName)
@@ -524,9 +521,9 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
         accessorKey: key,
         show: columnVisibility[key],
         width: columnSizing[key],
-        sorting:sorting[0].id===key?sorting:null
+        sorting: (sorting && sorting[0]?.id === key) ? sorting : undefined
       }));
-      console.log("saveInformation",saveInformation)
+      console.log("saveInformation", saveInformation)
 
       try {
         localStorage.setItem("GP_" + autoSavetableName, JSON.stringify(saveInformation));
@@ -545,8 +542,8 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
 
   // useEffect 내에서 debouncedSave 함수 호출
   useEffect(() => {
-    debouncedSave(columnOrder, columnVisibility, columnSizing,sorting,columnFilters);
-  }, [debouncedSave, columnOrder, columnVisibility, columnSizing,sorting,columnFilters]);
+    debouncedSave(columnOrder, columnVisibility, columnSizing, sorting, columnFilters);
+  }, [debouncedSave, columnOrder, columnVisibility, columnSizing, sorting, columnFilters]);
 
 
 
@@ -568,7 +565,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
       forceRerender: () => {
         rerender();
       },
-      setLoading:(val:boolean)=>{
+      setLoading: (val: boolean) => {
         set_loading(val);
       }
       // set_columnOrder: (newOrder) => {
@@ -583,32 +580,6 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
 
 
 
-  const rearrangeColumns = useCallback((targetId: string, direction: string) => {
-    const allColumns = table.getAllLeafColumns();
-    // console.log("allColumns",allColumns)
-    const idArr = allColumns.map(d => d.id);
-    const newOrder = [...idArr]; // 현재 컬럼 순서를 복사하여 새로운 배열 생성
-    // console.log("idArr",idArr2);
-    const targetIndex = newOrder.indexOf(targetId);
-    let ischanged: boolean = false;
-    if (direction === "up" && newOrder[targetIndex - 1]) {
-      // "up" 버튼을 누르고 현재 인덱스가 0보다 크면
-      const temp = newOrder[targetIndex - 1];
-      newOrder[targetIndex - 1] = newOrder[targetIndex];
-      newOrder[targetIndex] = temp;
-      ischanged = true;
-    } else if (direction === "down" && newOrder[targetIndex + 1]) {
-      // "down" 버튼을 누르고 현재 인덱스가 배열의 마지막 인덱스가 아니면
-      const temp = newOrder[targetIndex + 1];
-      newOrder[targetIndex + 1] = newOrder[targetIndex];
-      newOrder[targetIndex] = temp;
-      ischanged = true;
-    }
-
-    if (ischanged) {
-      setColumnOrder(newOrder);
-    }
-  }, []);
 
 
 
@@ -638,7 +609,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
       })
     }
   }
-
+  // console.log("pagination",pagination);
   // console.log("랜더")
   return (
     <DndContext
@@ -649,108 +620,18 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     >
       <div className={`GP_table ${className}`} ref={gpTableWrapRef} >
         {/* 툴바 */}
-        <div className="tableToolbar">
-          {globalfilter &&
-            <div className="global-filter">
-              <DebouncedInput
-                value={globalFilter ?? ''}
-
-                onChange={value => setGlobalFilter(String(value))}
-                className="gp_input"
-                placeholder={`${table.getPrePaginationRowModel().rows.length}rows 전체검색`}
-              />
-            </div>
-          }
-          {toolbarRender && toolbarRender()}
-          {columnAttributeButton &&
-            <Dropdown
-              // maxHeight="400px"
-              defaultShow={showColumnAttribute}
-              close={() => set_showColumnAttribute(false)}
-              triangleStyle={{ right: "40px" }}
-              btnRender={() => {
-              
-                return (<><button className="btn" onClick={() => set_showColumnAttribute(d => !d)}>
-                  <svg version="1.1" style={{
-                    height: '50%', transition: 'transform .3s ease-in-out',
-                    transform: showColumnAttribute ? 'rotate(90deg)' : ''
-                  }}
-                    viewBox="0 0 512 512" xmlSpace="preserve" xmlns="http://www.w3.org/2000/svg"
-                    xmlnsXlink="http://www.w3.org/1999/xlink"
-                    fill="currentColor">
-                    <path d="M424.5,216.5h-15.2c-12.4,0-22.8-10.7-22.8-23.4c0-6.4,2.7-12.2,7.5-16.5l9.8-9.6c9.7-9.6,9.7-25.3,0-34.9l-22.3-22.1 
-                                 c-4.4-4.4-10.9-7-17.5-7c-6.6,0-13,2.6-17.5,7l-9.4,9.4c-4.5,5-10.5,7.7-17,7.7c-12.8,0-23.5-10.4-23.5-22.7V89.1  c0-13.5-10.9-25.1-24.5-25.1h-30.4c-13.6,0-24.4,11.5-24.4,25.1v15.2c0,12.3-10.7,22.7-23.5,22.7c-6.4,0-12.3-2.7-16.6-7.4l-9.7-9.6  c-4.4-4.5-10.9-7-17.5-7s-13,2.6-17.5,7L110,132c-9.6,9.6-9.6,25.3,0,34.8l9.4,9.4c5,4.5,7.8,10.5,7.8,16.9  c0,12.8-10.4,23.4-22.8,23.4H89.2c-13.7,0-25.2,10.7-25.2,24.3V256v15.2c0,13.5,11.5,24.3,25.2,24.3h15.2  c12.4,0,22.8,10.7,22.8,23.4c0,6.4-2.8,12.4-7.8,16.9l-9.4,9.3c-9.6,9.6-9.6,25.3,0,34.8l22.3,22.2c4.4,4.5,10.9,7,17.5,7  c6.6,0,13-2.6,17.5-7l9.7-9.6c4.2-4.7,10.2-7.4,16.6-7.4c12.8,0,23.5,10.4,23.5,22.7v15.2c0,13.5,10.8,25.1,24.5,25.1h30.4  c13.6,0,24.4-11.5,24.4-25.1v-15.2c0-12.3,10.7-22.7,23.5-22.7c6.4,0,12.4,2.8,17,7.7l9.4,9.4c4.5,4.4,10.9,7,17.5,7  c6.6,0,13-2.6,17.5-7l22.3-22.2c9.6-9.6,9.6-25.3,0-34.9l-9.8-9.6c-4.8-4.3-7.5-10.2-7.5-16.5c0-12.8,10.4-23.4,22.8-23.4h15.2  c13.6,0,23.3-10.7,23.3-24.3V256v-15.2C447.8,227.2,438.1,216.5,424.5,216.5z M336.8,256L336.8,256c0,44.1-35.7,80-80,80  c-44.3,0-80-35.9-80-80l0,0l0,0c0-44.1,35.7-80,80-80C301.1,176,336.8,211.9,336.8,256L336.8,256z"/>
-                  </svg>컬럼속성
-                </button></>)
-              }}
-            >
-              {
-                showColumnAttribute &&
-                <div className="columnAttribute" >
-                  <div>
-                      <button onClick={resetAllColumnAttributes}>컬럼 초기화</button>
-                  </div>
-                  <div className="onecheckColumn">
-                    <BounceCheckBox
-                      {...{
-                        checked: table.getIsAllColumnsVisible(),
-                        onChange: table.getToggleAllColumnsVisibilityHandler(),
-                        label: "전체토글"
-                      }}
-                    />
-                  </div>
-                  {table.getAllLeafColumns().map(column => {
-                    // console.log("column", column)
-
-                    // console.log("allColumns",allColumns)
-                    // column.setFilterValue("소")
-                    const CD: any = column.columnDef;
-                    const string = CD.Header ? CD.Header : column.id;
-                    const targetID = column.id;
-                    // console.log("targetID",targetID)
-                    if(targetID==="multipleSelRowCheckbox"){
-                      return null; 
-                    }
-                    // if(CD.enableOrdering===false){
-                    //   return null;
-                    // }
-
-                    return (
-                      <div key={column.id} className="onecheckColumn">
-                        <BounceCheckBox
-                          {...{
-                            checked: column.getIsVisible(),
-                            onChange: column.getToggleVisibilityHandler(),
-                            disabled: !CD.enableHiding,
-                            label: string
-                          }}
-                        />
-                        {enableOrderingColumn && CD.enableOrdering !== false &&
-                          <div>
-                            <SVGBTN
-                              direction="up"
-                              onClick={() => {
-                                rearrangeColumns(targetID, "up");
-
-                              }} />
-                            <SVGBTN
-                              direction="down"
-                              onClick={() => {
-                                rearrangeColumns(targetID, "down");
-                              }} />
-                          </div>
-                        }
-                      </div>)
-                  })}
-                </div>
-              }
-            </Dropdown>
-          }
-        </div>
+        <GPtableToolbar
+          globalfilter={globalfilter}
+          globalFilter={globalFilter}
+          setGlobalFilter={setGlobalFilter}
+          toolbarRender={toolbarRender}
+          setColumnOrder={setColumnOrder}
+          columnAttributeButton={columnAttributeButton}
+          resetAllColumnAttributes={resetAllColumnAttributes}
+          table={table}
+          enableOrderingColumn={enableOrderingColumn}
+        />
         {/* 툴바끝 */}
-
-
-
 
 
         {/* 실제테이블 */}
@@ -784,12 +665,12 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
               ))}
             </thead>
 
-            
+
 
             {/* rows render 부분 */}
             <tbody>
-             {loading&&<tr><td colSpan={columns.length}><Loading /></td></tr>}
-              {!loading&&table.getRowModel().rows.map(row => {
+              {loading && <tr><td colSpan={columns.length}><Loading /></td></tr>}
+              {!loading && table.getRowModel().rows.map(row => {
                 const isSelRow = row.original === selectedRow;
                 // console.log("row",row)
                 return (
@@ -825,7 +706,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
 
 
         {/* pagination */}
-        {pagination &&
+        {usePagination &&
           <div className="pagination">
 
             <button
@@ -842,10 +723,16 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
                   className="nowPage"
                   type="number"
                   max={table.getPageCount() || undefined}
-                  defaultValue={table.getState().pagination.pageIndex + 1}
+                  value={pagination.pageIndex + 1}
                   onChange={e => {
-                    const page = e.target.value ? Number(e.target.value) - 1 : 0
-                    table.setPageIndex(page)
+                    const page = e.target.value ? Number(e.target.value) - 1 : 0;
+                    setPagination(p => {
+                      return {
+                        ...p,
+                        pageIndex: page
+                      }
+                    })
+                    // table.setPageIndex(page)
                   }}
                 />
                 &nbsp;of&nbsp;{table.getPageCount()}
@@ -854,9 +741,16 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
               <div style={{ marginLeft: '10%' }}>
                 <select
                   className="viewRows"
-                  value={table.getState().pagination.pageSize}
+                  value={pagination.pageSize}
                   onChange={e => {
-                    table.setPageSize(Number(e.target.value))
+                    setPagination(p => {
+
+                      return {
+                        ...p,
+                        pageSize: Number(e.target.value)
+                      };
+                    })
+                    // table.setPageSize(Number(e.target.value))
                   }}
                 >
                   {paginationArr.map(pageSize => (
@@ -875,13 +769,8 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
             >
               {'>'}
             </button>
-
-
-
           </div>
         }
-
-
       </div>
 
     </DndContext>
@@ -928,16 +817,16 @@ const DraggableTableHeader = ({
   //enableOrderingColumn 일때만
   //attributes  listeners 할당
   // const a = header.getContext();
-  const headerString = useMemo(()=>{
-    const columnDef:any = header.column.columnDef;
+  const headerString = useMemo(() => {
+    const columnDef: any = header.column.columnDef;
     // console.log("columnDef 거시기")
-    if(columnDef.Header){
+    if (columnDef.Header) {
       return columnDef.Header;
     }
-    else{
+    else {
       return columnDef.accessorKey;
     }
-  },[header.column.columnDef])
+  }, [header.column.columnDef])
 
   // console.log("headerString",headerString)
   return (
@@ -955,9 +844,9 @@ const DraggableTableHeader = ({
           <div
             className={`${columnDef?.useSort === false ? "headerText" : "headerText sortable"}`}
             style={{
-              maxWidth:columnSize+"px"
+              maxWidth: columnSize + "px"
             }}
-            
+
             onClick={
               columnDef?.useSort === false
                 ? () => { }
@@ -968,8 +857,8 @@ const DraggableTableHeader = ({
 
           >
             <span title={headerString}>{flexRender(header.column.columnDef.header, header.getContext())}</span>
-            
-            </div>
+
+          </div>
 
           {/* 소트*/}
           <div className={`${columnDef?.useSort === false ? "" : "sortor"} ${header.column.getIsSorted() as string ? header.column.getIsSorted() : ''}`} />
@@ -1015,13 +904,13 @@ const DragAlongCell = ({ cell, onClick }:
   const { isDragging, setNodeRef, transform } = columnDef.enableOrdering !== false ?
     useSortable({ id: cell.column.id }) :
     { isDragging: false, setNodeRef: () => { }, transform: { x: 0, y: 0, scaleX: 1, scaleY: 1 } };
-    const tdref = useRef(null);
-   const cellSize = useMemo(()=>{
-    let size=cell.column.getSize();
+  const tdref = useRef(null);
+  const cellSize = useMemo(() => {
+    let size = cell.column.getSize();
     // console.log("tdref",tdref)
     return size;
-  },[cell.column.getSize()]);
-   
+  }, [cell.column.getSize()]);
+
   // console.log("cellSize",cellSize)
 
   const style: CSSProperties = {
@@ -1035,9 +924,9 @@ const DragAlongCell = ({ cell, onClick }:
 
   // console.log("cell.getValu()",cell.getValue());
   // console.log("cell.getContext()",cell.getContext())
-  const cellText:string = useMemo(()=>{
+  const cellText: string = useMemo(() => {
     // console.log("asf",cell.getValue());
-    
+
     const a = cell.renderValue() || "";
     // const b=cell.column.columnDef;
     // const cc:CellContext<any,unknown>=cell.getContext();
@@ -1049,27 +938,27 @@ const DragAlongCell = ({ cell, onClick }:
     // }
     // console.log("c",c)
     return a.toString();
-  },[cell])
+  }, [cell])
 
   return (
-    <td style={style} 
+    <td style={style}
       ref={setNodeRef}
-      
+
       onClick={onClick}
-  
+
     >
-      <div className="cell" 
+      <div className="cell"
         ref={tdref}
 
       >
-        
-        <div className="cellText" 
-              style={{maxWidth:cellSize}}
+
+        <div className="cellText"
+          style={{ maxWidth: cellSize }}
         >
-        <span title={cellText}>
-        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-        </span>
-      </div>
+          <span title={cellText}>
+            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          </span>
+        </div>
 
 
       </div>

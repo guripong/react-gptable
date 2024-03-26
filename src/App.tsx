@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { GPtable,IndeterminateCheckbox,} from './lib';
-import type{ GPTableInstance,GPColumn} from './lib';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { GPtable, IndeterminateCheckbox, } from './lib';
+import type { GPTableInstance, GPColumn } from './lib';
 import "./App.scss"
 
-import type {} from 'react'; // cost
+import type { } from 'react'; // cost
 
 type Person = {
   firstName: string
@@ -26,31 +26,32 @@ type Person = {
 
 function App() {
 
-  const column:GPColumn[] = useMemo(() => {
-    let originArr:GPColumn[]= [
+
+  const column: GPColumn[] = useMemo(() => {
+    let originArr: GPColumn[] = [
       {
-        Header:"resize,sort,ordering불가",
+        Header: "resize,sort,ordering불가",
         accessorKey: "data_idx", //key name
         useSort: false, // default true
-        useFilter:false, // default false
+        useFilter: false, // default false
 
         enableResizing: false,// default true
-        enableOrdering:false, // default true
+        enableOrdering: false, // default true
         enableHiding: true, //default true
-      
+
       },
       {
-        Header:"가능.assggasg",
+        Header: "가능.assggasg",
         accessorKey: "data_idx2", //key name
         // defaultSort:"desc",
         cell: (info: any) => {
-          const { row, getValue ,renderValue } = info;
+          const { row, getValue, renderValue } = info;
           // console.log("허허",row);
           return <div>
             <span title={row.value}>
               {getValue()}
             </span>
- 
+
           </div>;
         },//필터불가 //2차랜더값
       },
@@ -113,7 +114,7 @@ function App() {
       //   },
       // },
       {
-        width:300,
+        width: 300,
         Header: "나이",
         accessorKey: "age",
         useFilter: true,
@@ -134,9 +135,7 @@ function App() {
     return originArr;
   }, []);
 
-
-
-  const [data, setData] = useState<Person[]>([{
+  const [data, setData] = useState<Person[]>(()=>[{
     firstName: "소1111111111111111111111111",
     lastName: "기영",
     age: 24,
@@ -157,13 +156,10 @@ function App() {
     age: 3,
   }]);
 
-
-
   const gptableRef = useRef<GPTableInstance>(null);
-  const gptableRef2 = useRef<GPTableInstance>(null);
 
   useEffect(() => {
-    // console.log("gptableRef", gptableRef);
+    console.log("gptableRef", gptableRef);
     if (gptableRef?.current) {
       const tableRef = gptableRef.current;
       // const gptable=tableRef.getTable();
@@ -173,8 +169,39 @@ function App() {
     }
   }, [gptableRef])
 
+  const refreshdata = useCallback(() => {
+    // console.log("새로고친후 체크값들 기억X")
+    gptableRef.current?.setLoading(true);
+    setTimeout(function () {
+      gptableRef.current?.setLoading(false);
+      setData(prevData=>[
+        {
+          firstName: "소",
+          lastName: "기영",
+          age: 24,
+          mycheckbox2: 1,
+          something: 1,
+        },
+        {
+          firstName: "류",
+          lastName: "기정",
+          age: 14,
 
-  console.log("여기랜더")
+        }, {
+          firstName: "정",
+          lastName: "연광",
+          age: 3,
+        }])
+    }, 600);
+
+  },[]);
+
+
+  useEffect(()=>{
+    console.log("여기랜더")
+  },[])
+
+
   return (<div className="app" style={{ background: "#eee" }} >
     {/* {"isOdd사용후:" + isOdd(4)} */}
     <div>
@@ -189,8 +216,8 @@ function App() {
 
         data={data}
         column={column}
-        
-        onClickRow={(e,row,cell)=>{
+
+        onClickRow={(e, row, cell) => {
           // console.log("클릭row",row);
           // console.log("클릭cell",cell);
         }}
@@ -206,20 +233,20 @@ function App() {
         option={{
           //saveTable:"asf", //잇을때만 저장
           //저장할때는 width 순서 hide   // sort안하고
-          autoSavetableName:"oppa", //필터값 기억한다
+          autoSavetableName: "oppa", //필터값 기억한다
           //컬럼순서 
-          row:{
-            rememberSelRow:true, //default true
-            selRowColor:"#666",
-            selRowBackground:"rgba(255,0,0,.1)", //1줄선택로우 배경색 default transparent         
-            multipleSelRowCheckbox:true, //다중 선택row default false
+          row: {
+            rememberSelRow: true, //default true
+            selRowColor: "#666",
+            selRowBackground: "rgba(255,0,0,.1)", //1줄선택로우 배경색 default transparent         
+            multipleSelRowCheckbox: true, //다중 선택row default false
           },
-          column:{
-            resizing:true, //모든컬럼 리사이징 가능여부 default true
-            ordering:true, //모든컬럼 오더링 가능여부 default true
+          column: {
+            resizing: true, //모든컬럼 리사이징 가능여부 default true
+            ordering: true, //모든컬럼 오더링 가능여부 default true
           },
           pagination: {
-            paginationArr: [1,2, 3, 10, 50], //default 10,20,30,40
+            paginationArr: [1, 2, 3, 10, 50], //default 10,20,30,40
             defaultPageSize: 2,  //default = paginationArr[0]
           },
           toolbar: {
@@ -227,37 +254,7 @@ function App() {
             columnAttributeButton: true,// defaulte false,
             render: () => {
               return (<>
-                <button className="btn btn-green" onClick={()=>{
-                  // console.log("새로고친후 체크값들 기억X")
-                  gptableRef.current?.setLoading(true);
-                  setTimeout(function(){
-                    gptableRef.current?.setLoading(false);
-                    setData([
-                      {
-                      firstName: "소",
-                      lastName: "기영",
-                      age: 24,
-                      mycheckbox2: 1,
-                      something: 1,
-                    }, 
-                    {
-                      firstName: "박",
-                      lastName: "서하",
-                      age: -5,
-                    }, 
-                    {
-                      firstName: "류",
-                      lastName: "기정",
-                      age: 14,
-                  
-                    }, {
-                      firstName: "정",
-                      lastName: "연광",
-                      age: 3,
-                    }])
-                  },300);
-            
-                }}>새로고침</button>
+                <button className="btn btn-green" onClick={refreshdata}>새로고침</button>
                 {/* <button className="btn btn-orange" disabled={true}>테이블저장</button> */}
               </>)
             }
@@ -269,11 +266,11 @@ function App() {
 
 
     </div>
-        <br/>
+    <br />
     2번테이블 아래
-            <div style={{ width: '800px', display: "flex", background: "#fff" }}>
+    <div style={{ width: '800px', display: "flex", background: "#fff" }}>
 
-      <GPtable
+      {/* <GPtable
         className="hoho2"
         ref={gptableRef2}
 
@@ -336,14 +333,14 @@ function App() {
                     age: 3,
                   }])
                 }}>새로고침</button>
-                {/* <button className="btn btn-orange" disabled={true}>테이블저장</button> */}
+          
               </>)
             }
           }
         }}
 
 
-      />
+      /> */}
 
 
     </div>
