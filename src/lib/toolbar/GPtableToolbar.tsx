@@ -7,7 +7,8 @@ import Dropdown from "../components/DropDown/DropDown";
 import SVGBTN from "../svg/SVGBTN";
 
 interface GPtableToolbarProps {
-    globalfilter: boolean;
+    globalfilter: boolean | undefined;
+    saveExcelButton: boolean | undefined;
     globalFilter: string | null;
     setGlobalFilter: (value: string) => void;
     toolbarRender: (() => JSX.Element) | null | undefined;
@@ -16,10 +17,11 @@ interface GPtableToolbarProps {
     resetAllColumnAttributes: () => void;
     table: ReturnType<typeof useReactTable>; // 테이블 관련 데이터 및 메서드에 대한 타입 (실제로 사용되는 타입에 따라 세부적으로 정의해야 함)
     enableOrderingColumn: boolean;
+
 }
 
 const GPtableToolbar: React.FC<GPtableToolbarProps> = (props) => {
-    const { globalfilter,
+    const { globalfilter, saveExcelButton,
         globalFilter, setGlobalFilter,
         toolbarRender, setColumnOrder,
         columnAttributeButton, resetAllColumnAttributes,
@@ -27,7 +29,7 @@ const GPtableToolbar: React.FC<GPtableToolbarProps> = (props) => {
         enableOrderingColumn } = props;
 
     const [showColumnAttribute, set_showColumnAttribute] = useState<boolean>(false);
-
+    const [showExcelDownloadList, set_showExcelDownloadList] = useState<boolean>(false);
     const rearrangeColumns = useCallback((targetId: string, direction: string) => {
         const allColumns = table.getAllLeafColumns();
         // console.log("allColumns",allColumns)
@@ -38,12 +40,27 @@ const GPtableToolbar: React.FC<GPtableToolbarProps> = (props) => {
         let ischanged: boolean = false;
         if (direction === "up" && newOrder[targetIndex - 1]) {
             // "up" 버튼을 누르고 현재 인덱스가 0보다 크면
+            // console.log("newOrder[targetIndex - 1]",newOrder[targetIndex - 1])
+            // console.log(allColumns.find(d=>d.id===newOrder[targetIndex - 1]));
+
+            const columndDef: any = allColumns.find(d => d.id === newOrder[targetIndex - 1])?.columnDef;
+            console.log("columndDef.enableOrdering", columndDef.enableOrdering)
+            if (columndDef.enableOrdering === false) {
+                return;
+            }
+
             const temp = newOrder[targetIndex - 1];
             newOrder[targetIndex - 1] = newOrder[targetIndex];
             newOrder[targetIndex] = temp;
             ischanged = true;
         } else if (direction === "down" && newOrder[targetIndex + 1]) {
             // "down" 버튼을 누르고 현재 인덱스가 배열의 마지막 인덱스가 아니면
+            const columndDef: any = allColumns.find(d => d.id === newOrder[targetIndex + 1])?.columnDef;
+            if (columndDef.enableOrdering === false) {
+                return;
+            }
+
+
             const temp = newOrder[targetIndex + 1];
             newOrder[targetIndex + 1] = newOrder[targetIndex];
             newOrder[targetIndex] = temp;
@@ -69,6 +86,26 @@ const GPtableToolbar: React.FC<GPtableToolbarProps> = (props) => {
             </div>
         }
         {toolbarRender && toolbarRender()}
+        {saveExcelButton &&
+            <Dropdown
+                defaultShow={showExcelDownloadList}
+                close={() => set_showExcelDownloadList(false)}
+                triangleStyle={{ right: "40px" }}
+                btnRender={() => {
+
+                    return (<><button className="btn" onClick={() => set_showExcelDownloadList(d => !d)}>
+                        다운로드
+                    </button></>)
+                }} >
+                {showExcelDownloadList &&
+                    <>
+                        <button>aaaaaaaaaaa</button>
+                        <button>aaaaaaaaaaa</button>
+                    </>
+                }
+
+            </Dropdown>
+        }
         {columnAttributeButton &&
             <Dropdown
                 // maxHeight="400px"
@@ -95,6 +132,12 @@ const GPtableToolbar: React.FC<GPtableToolbarProps> = (props) => {
                     showColumnAttribute &&
                     <div className="columnAttribute" >
                         <div>
+                            order,sizing,visible,
+                            sorting,filter는 <br />초기화 완료
+
+                            <br />
+                            selectrow와 mutiplecheckbox는?
+                            <br />
                             <button onClick={resetAllColumnAttributes}>컬럼 초기화</button>
                         </div>
                         <div className="onecheckColumn">

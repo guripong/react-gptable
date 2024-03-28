@@ -280,7 +280,7 @@ $hover-color: rgb(70, 70, 70);
     .sortor {
         position: absolute;
         right:0;
-
+        cursor: pointer;
         // background:red;
         margin-right:6px;
         height:100%;
@@ -344,7 +344,7 @@ $hover-color: rgb(70, 70, 70);
                     // line-height: 1.2rem;
                     .headerText{
       
-                
+                        width:100%;
                         white-space: nowrap;
                         text-overflow: ellipsis;
                         overflow: hidden;
@@ -357,6 +357,9 @@ $hover-color: rgb(70, 70, 70);
                             padding-left:20px;
                             padding-right:20px;
                             cursor: pointer !important;
+                            span{
+                                cursor:pointer;
+                            }
                         }
                     }
                     //resizer가 여기 위치

@@ -89,6 +89,12 @@ interface GPColumn {
     useFilter?: boolean;
 
     /**
+     * 컬럼어 default filter value입니다
+     * number value의 경우 min max
+     * **/
+    filterValue?: string | any[];
+    
+    /**
      * 컬럼의 표시 여부를 나타냅니다.
      * 기본값은 true입니다.
      */
@@ -161,8 +167,8 @@ interface GPtableProps<T> {
         }
         toolbar?:{
             globalfilter?: boolean;
-            defaultToolbar?: boolean;
             columnAttributeButton?: boolean;
+            saveExcelButton?: boolean;
             render?: () => JSX.Element;
         }
     }

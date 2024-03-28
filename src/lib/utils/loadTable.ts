@@ -1,9 +1,17 @@
 import { GPColumn } from "lib/GPTableTypes";
-export function loadTable(originArr: GPColumn[],name:string): GPColumn[] {
-  let load_columns: any = localStorage.getItem(`GP_${name}`);
-  if (load_columns) {
-    load_columns = JSON.parse(load_columns);
+type LoadTableResult = {
+  columns: GPColumn[]; // 로드된 컬럼 배열
+  pageSize: number | null; // 로드된 페이지 크기 또는 null
+};
+
+export function loadTable(originArr: GPColumn[],name:string): LoadTableResult {
+  let load: any = localStorage.getItem(`GP_${name}`);
+  if (load) {
+    load = JSON.parse(load);
   }
+  const load_columns = load.columns;
+  const pageSize = load.pageSize;
+
   if (load_columns) {
     //order 맞게 배열
     originArr.sort((a, b) => {
@@ -30,8 +38,14 @@ export function loadTable(originArr: GPColumn[],name:string): GPColumn[] {
         };
       }
     }
-    return originArr;
+    return {
+      columns:originArr,
+      pageSize:pageSize
+    };
   } else {
-    return originArr;
+    return {
+      columns:originArr,
+      pageSize:null
+    }
   }
 }

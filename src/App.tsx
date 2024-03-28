@@ -6,6 +6,7 @@ import "./App.scss"
 import type { } from 'react'; // cost
 
 type Person = {
+  data_idx:number
   firstName: string
   lastName: string
   age?: number
@@ -34,7 +35,7 @@ function App() {
         Header: "resize,sort,ordering불가",
         accessorKey: "data_idx", //key name
         useSort: false, // default true
-        useFilter: false, // default false
+        // useFilter: true, // default false
 
         enableResizing: false,// default true
         enableOrdering: false, // default true
@@ -119,6 +120,7 @@ function App() {
         Header: "나이",
         accessorKey: "age",
         useFilter: true,
+        // filterValue:[undefined,"0"],
         cell: (info: any) => {
           const { row, getValue } = info;
           // console.log("허허",row);
@@ -137,21 +139,25 @@ function App() {
   }, []);
 
   const [data, setData] = useState<Person[]>(()=>[{
+    data_idx:1,
     firstName: "소1111111111111111111111111",
     lastName: "기영",
     age: 24,
     mycheckbox2: 1,
     something: 1,
   }, {
+    data_idx:2,
     firstName: "박",
     lastName: "서하",
     age: -5,
   }, {
+    data_idx:3,
     firstName: "류",
     lastName: "기정",
     age: 14,
 
   }, {
+    data_idx:4,
     firstName: "정",
     lastName: "연광",
     age: 3,
@@ -160,7 +166,7 @@ function App() {
   const gptableRef = useRef<GPTableInstance>(null);
 
   useEffect(() => {
-    console.log("gptableRef", gptableRef);
+    // console.log("gptableRef", gptableRef);
     if (gptableRef?.current) {
       const tableRef = gptableRef.current;
       // const gptable=tableRef.getTable();
@@ -175,31 +181,36 @@ function App() {
     gptableRef.current?.setLoading(true);
     setTimeout(function () {
       gptableRef.current?.setLoading(false);
-      setData(prevData=>[
-        {
-          firstName: "소",
-          lastName: "기영",
-          age: 24,
-          mycheckbox2: 1,
-          something: 1,
-        },
-        {
+      setData([{
+          data_idx:2,
+          firstName: "박",
+          lastName: "서하",
+          age: -5,
+        }, {
+          data_idx:3,
           firstName: "류",
           lastName: "기정",
           age: 14,
-
+      
         }, {
+          data_idx:4,
           firstName: "정",
           lastName: "연광",
           age: 3,
+        },{
+          data_idx:1,
+          firstName: "소",
+          lastName: "기광",
+          age: 3,
         }])
+
     }, 600);
 
   },[]);
 
 
   useEffect(()=>{
-    console.log("여기랜더")
+    // console.log("여기랜더")
   },[])
 
 
@@ -237,7 +248,7 @@ function App() {
           autoSavetableName: "oppa", //필터값 기억한다
           //컬럼순서 
           row: {
-            rememberSelRow: true, //default true
+            rememberSelRow: true, //default true //한줄선택 기억 pKey가 있다면
             selRowColor: "#666",
             selRowBackground: "rgba(255,0,0,.1)", //1줄선택로우 배경색 default transparent         
             multipleSelRowCheckbox: true, //다중 선택row default false
@@ -248,11 +259,12 @@ function App() {
           },
           pagination: {
             paginationArr: [1, 2, 3, 10, 50], //default 10,20,30,40
-            defaultPageSize: 2,  //default = paginationArr[0]
+            // defaultPageSize: 2,  //default = paginationArr[0]
           },
           toolbar: {
             globalfilter: true,//default false
             columnAttributeButton: true,// defaulte false,
+            saveExcelButton : true, //default false,            
             render: () => {
               return (<>
                 <button className="btn btn-green" onClick={refreshdata}>새로고침</button>
