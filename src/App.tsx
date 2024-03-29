@@ -32,7 +32,7 @@ function App() {
     let originArr: GPColumn[] = [
       {
         pKey:true,
-        Header: "resize,sort,ordering불가",
+        Header: "pKeyidx",
         accessorKey: "data_idx", //key name
         useSort: false, // default true
         // useFilter: true, // default false
@@ -40,11 +40,12 @@ function App() {
         enableResizing: false,// default true
         enableOrdering: false, // default true
         enableHiding: true, //default true
-
+        width: 80,
       },
       {
         Header: "가능.assggasg",
         accessorKey: "data_idx2", //key name
+        width: 100,
         // defaultSort:"desc",
         cell: (info: any) => {
           const { row, getValue, renderValue } = info;

@@ -5,12 +5,13 @@ type LoadTableResult = {
 };
 
 export function loadTable(originArr: GPColumn[],name:string): LoadTableResult {
+
   let load: any = localStorage.getItem(`GP_${name}`);
   if (load) {
     load = JSON.parse(load);
   }
   const load_columns = load.columns;
-  const pageSize = load.pageSize;
+  const pageSize = load.pageSize || null;
 
   if (load_columns) {
     //order 맞게 배열

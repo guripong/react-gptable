@@ -192,73 +192,76 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     rememberSelRow, selRowBackground, selRowColor, multipleSelRowCheckbox,
     //테이블 자동저장옵션
     autoSavetableName
-  } = useMemo(() => {
+  }
+    = useMemo(() => {
 
-    const defaultOptions = {
-      autoSavetableName: null,
-      row: {
-        rememberSelRow: true,
-        selRowColor: "#000",
-        selRowBackground: "#fff",
-        multipleSelRowCheckbox: false,
-      },
-      column: {
-        resizing: true,
-        ordering: true,
-      },
-      pagination: null,
-      toolbar: {
-        globalfilter: false,
-        columnAttributeButton: false,
-        saveExcelButton:false,
-        render: null,
-      }
-    };
+      const defaultOptions = {
+        autoSavetableName: null,
+        row: {
+          rememberSelRow: true,
+          selRowColor: "#000",
+          selRowBackground: "#fff",
+          multipleSelRowCheckbox: false,
+        },
+        column: {
+          resizing: true,
+          ordering: true,
+        },
+        pagination: null,
+        toolbar: {
+          globalfilter: false,
+          columnAttributeButton: false,
+          saveExcelButton: false,
+          render: null,
+        }
+      };
 
-    const option = {
-      ...defaultOptions,
-      ...userOptions
-    };
+      const option = {
+        ...defaultOptions,
+        ...userOptions
+      };
 
-    const globalfilter = option?.toolbar?.globalfilter;
-    const columnAttributeButton = option?.toolbar?.columnAttributeButton;
-    const toolbarRender = option?.toolbar?.render;
-    const saveExcelButton = option?.toolbar?.saveExcelButton;
+      const globalfilter = option?.toolbar?.globalfilter;
+      const columnAttributeButton = option?.toolbar?.columnAttributeButton;
+      const toolbarRender = option?.toolbar?.render;
+      const saveExcelButton = option?.toolbar?.saveExcelButton;
 
-    const usePagination = option?.pagination || null;
-    const paginationArr = (usePagination?.paginationArr && Array.isArray(usePagination.paginationArr)) ? usePagination.paginationArr : [10, 20, 30, 40];
-    const defaultPageSize = Number.isInteger(usePagination?.defaultPageSize) ? usePagination?.defaultPageSize : paginationArr[0];
-   
-    const enableResizingColumn = option?.column?.resizing ?? true;
-    const enableOrderingColumn = option?.column?.ordering ?? true;
+      const usePagination = option?.pagination || null;
+      const paginationArr = (usePagination?.paginationArr && Array.isArray(usePagination.paginationArr)) ? usePagination.paginationArr : [10, 20, 30, 40];
+      const defaultPageSize = Number.isInteger(usePagination?.defaultPageSize) ? usePagination?.defaultPageSize : paginationArr[0];
 
-    const rememberSelRow = option.row.rememberSelRow;
-    const selRowBackground = option.row?.selRowBackground ?? "#fff";
-    const selRowColor = option.row?.selRowColor ?? "#000";
-   
-    const multipleSelRowCheckbox = option.row.multipleSelRowCheckbox ?? false;
-    
-    const autoSavetableName = option.autoSavetableName;
+      const enableResizingColumn = option?.column?.resizing ?? true;
+      const enableOrderingColumn = option?.column?.ordering ?? true;
 
-    return {
-      globalfilter,
-      columnAttributeButton,
-      toolbarRender,
-      usePagination,
-      paginationArr,
-      defaultPageSize,
-      enableResizingColumn,
-      enableOrderingColumn,
-      rememberSelRow,
-      selRowBackground,
-      selRowColor,
-      multipleSelRowCheckbox,
-      autoSavetableName,
-      saveExcelButton
-    };
-  }, [userOptions]);
+      const rememberSelRow = option.row.rememberSelRow;
+      const selRowBackground = option.row?.selRowBackground ?? "#fff";
+      const selRowColor = option.row?.selRowColor ?? "#000";
+
+      const multipleSelRowCheckbox = option.row.multipleSelRowCheckbox ?? false;
+
+      const autoSavetableName = option.autoSavetableName;
+
+      return {
+        globalfilter,
+        columnAttributeButton,
+        toolbarRender,
+        usePagination,
+        paginationArr,
+        defaultPageSize,
+        enableResizingColumn,
+        enableOrderingColumn,
+        rememberSelRow,
+        selRowBackground,
+        selRowColor,
+        multipleSelRowCheckbox,
+        autoSavetableName,
+        saveExcelButton
+      };
+    }, [userOptions]);
+
 
   const gpTableWrapRef = useRef<HTMLDivElement>(null);
+
 
 
 
@@ -273,7 +276,6 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
 
 
   const [globalFilter, setGlobalFilter] = useState<any>('');
-
   const [columnOrder, setColumnOrder] = React.useState<string[]>([])
   const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>({})
   const [columnSizing, setColumnSizing] = useState<Record<string, number>>({});
@@ -295,12 +297,12 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
 
     if (autoSavetableName) {
       try {
-        const {columns,pageSize} = loadTable(beforeload_column, autoSavetableName);
-        newLoadedColumn=columns;
-        setPagination((prev:any)=>{
-          return{
+        const { columns, pageSize: loadPageSize } = loadTable(beforeload_column, autoSavetableName);
+        newLoadedColumn = columns;
+        setPagination((prev: any) => {
+          return {
             ...prev,
-            pageSize:pageSize
+            pageSize: loadPageSize || defaultPageSize
           }
         })
       }
@@ -310,7 +312,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
       }
     }
     return newLoadedColumn;
-  }, [beforeload_column, autoSavetableName]);
+  }, [beforeload_column, autoSavetableName, defaultPageSize]);
 
   const pKey = useMemo(() => {
     for (let i = 0; i < icolumn.length; i++) {
@@ -335,17 +337,23 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
         enableHiding: false,// 디폴트true 
         enableResizing: false,// default true
         enableOrdering: false, //default true
-        size: 20,
+        size: 50,
+        minSize: 50,
+        maxSize: 50,
         accessorKey: "multipleSelRowCheckbox",
-        header: ({ table }: any) => (
-          <IndeterminateCheckbox
-            {...{
-              checked: table.getIsAllRowsSelected(),
-              indeterminate: table.getIsSomeRowsSelected(),
-              onChange: table.getToggleAllRowsSelectedHandler(),
-            }}
-          />
-        ),
+        header: ({ table }: any) => {
+
+          return (<div style={{ width: "100%", display: "flex", justifyContent: "center", alignContent: "center" }}>
+            <IndeterminateCheckbox
+              {...{
+                checked: table.getIsAllRowsSelected(),
+                indeterminate: table.getIsSomeRowsSelected(),
+                onChange: table.getToggleAllRowsSelectedHandler(),
+              }}
+            />
+          </div>
+          )
+        },
         cell: ({ row }: any) => {
 
           return (<div style={{ width: "100%", display: "flex", justifyContent: "center", alignContent: "center" }}>
@@ -459,7 +467,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
 
   const table = useReactTable({
     data,
-    
+
     columns,
     filterFns: {
       fuzzy: fuzzyFilter,
@@ -467,7 +475,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     autoResetAll: false,
     defaultColumn: {
       // size:300,
-      minSize: 50,
+      // minSize: 40,
       // maxSize:500,
     },
     state: {
@@ -522,16 +530,16 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     debugTable: false,
     debugHeaders: false,
     debugColumns: false,
-  
+
   });
 
-  const getMultipleSelectRowsOrginal=useCallback(()=>{
+  const getMultipleSelectRowsOrginal = useCallback(() => {
     const prevSelectedRows = Object.keys(rowSelection).map(
       (key) =>
         table.getSelectedRowModel().rowsById[key]?.original || []
     )
     return prevSelectedRows;
-  },[rowSelection,table]);
+  }, [rowSelection, table]);
 
 
   // console.log("rows",rows)
@@ -541,8 +549,8 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
   useEffect(() => {
     // console.log("pagination 값 초기화")
     // console.log("바뀐data", data)
-    function selectedRowsDone(){
-      return new Promise(function(resolve){
+    function selectedRowsDone() {
+      return new Promise(function (resolve) {
         setSelectedRow((prevSelectedOneRow) => {
           if (rememberSelRow && pKey && prevSelectedOneRow) {
             // console.log("prevSelectedOneRow",prevSelectedOneRow);
@@ -559,20 +567,20 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
 
               resolve(remember_dataidx); //resolve 후에 isfind 도 return되는것이지?
               return isfind;
-              
+
             }
-            else{
+            else {
               resolve(null);
             }
           }
-          else{
+          else {
             resolve(null);
             return null;
           }
         });
       });
     }
-    selectedRowsDone().then((res_findkey)=>{
+    selectedRowsDone().then((res_findkey) => {
       // console.log("res_findkey",res_findkey);
       setPagination(prev => {
         if (rememberSelRow && pKey) {
@@ -580,21 +588,21 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
           //data     
           let before_pageSize = prev.pageSize;
 
-          let returnobj={
+          let returnobj = {
             ...prev,
-            pageIndex:0
+            pageIndex: 0
           }
-          if(res_findkey!==null){
+          if (res_findkey !== null) {
             // const copydata = JSON.parse(JSON.stringify(data));
-             const rows = table.getSortedRowModel().rows;
-             const data =rows.map(d=>d.original);
+            const rows = table.getSortedRowModel().rows;
+            const data = rows.map(d => d.original);
             // console.log("rows",copydata,rows)
-            for(let i = 0 ; i < data.length ; i++ ){
-              if(data[i][pKey]===res_findkey){
+            for (let i = 0; i < data.length; i++) {
+              if (data[i][pKey] === res_findkey) {
                 // console.log("i",i)
-                let pagenumber = Math.floor((i)/before_pageSize)+1;
-                let pageindex= pagenumber-1;
-                returnobj.pageIndex=pageindex;
+                let pagenumber = Math.floor((i) / before_pageSize) + 1;
+                let pageindex = pagenumber - 1;
+                returnobj.pageIndex = pageindex;
                 // console.log("pagenumber",pagenumber);
                 break;
               }
@@ -619,13 +627,14 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
           }
         }
       })
-  
+
     })
 
     if (multipleSelRowCheckbox) {
       setRowSelection({});
     }
-  }, [data, usePagination, defaultPageSize, rememberSelRow, multipleSelRowCheckbox, pKey,table])
+  }, [data, usePagination, defaultPageSize, rememberSelRow, multipleSelRowCheckbox, pKey, table])
+
 
 
 
@@ -704,7 +713,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     columnSizing: Record<string, number>,
     sorting: ColumnSort[],
     columnFilters: ColumnFiltersState,
-    pagination:PaginationState,
+    pagination: PaginationState,
   ) => {
     if (autoSavetableName) {
 
@@ -718,10 +727,10 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
       }));
       // console.log("saveInformation", saveInformation)
       // console.log(pagination,pagination);
-      const {pageSize} =pagination;
-      const save={
-        pageSize:pageSize,
-        columns:saveInformation,
+      const { pageSize } = pagination;
+      const save = {
+        pageSize: pageSize,
+        columns: saveInformation,
       }
       try {
         localStorage.setItem("GP_" + autoSavetableName, JSON.stringify(save));
@@ -741,8 +750,8 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
 
   // useEffect 내에서 debouncedSave 함수 호출
   useEffect(() => {
-    debouncedSave(columnOrder, columnVisibility, columnSizing, sorting, columnFilters,pagination);
-  }, [debouncedSave, columnOrder, columnVisibility, columnSizing, sorting, columnFilters,pagination]);
+    debouncedSave(columnOrder, columnVisibility, columnSizing, sorting, columnFilters, pagination);
+  }, [debouncedSave, columnOrder, columnVisibility, columnSizing, sorting, columnFilters, pagination]);
 
 
 
@@ -817,6 +826,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
       <div className={`GP_table ${className}`} ref={gpTableWrapRef} >
         {/* 툴바 */}
         <GPtableToolbar
+          data={data}
           globalfilter={globalfilter}
           saveExcelButton={saveExcelButton}
           globalFilter={globalFilter}
@@ -1040,7 +1050,7 @@ const DraggableTableHeader = ({
         <div
 
           {...{
-            className: `header`,
+            className: `header no-drag`,
           }}
 
         >
@@ -1066,7 +1076,7 @@ const DraggableTableHeader = ({
           {/* 소트*/}
           <div className={`${columnDef?.useSort === false ? "" : "sortor"} 
           ${header.column.getIsSorted() as string ? header.column.getIsSorted() : ''}`}
-          
+
             onClick={
               columnDef?.useSort === false
                 ? () => { }
@@ -1132,6 +1142,13 @@ const DragAlongCell = ({ cell, onClick }:
     width: cell.column.getSize(),
     zIndex: isDragging ? 1 : 0,
   }
+  const isMultipleCheckBox = useMemo(() => {
+    const columnDef: any = cell.column.columnDef;
+    if (columnDef.accessorKey === "multipleSelRowCheckbox") {
+      return true;
+    }
+    return false;
+  }, [cell.column.columnDef])
 
   // console.log("cell.getValu()",cell.getValue());
   // console.log("cell.getContext()",cell.getContext())
@@ -1160,16 +1177,19 @@ const DragAlongCell = ({ cell, onClick }:
     >
       <div className="cell"
         ref={tdref}
-
       >
+        {isMultipleCheckBox ?
+          <>{flexRender(cell.column.columnDef.cell, cell.getContext())}</>
+          :
+          <div className="cellText"
+            style={{ maxWidth: cellSize }}
+          >
+            <span title={cellText}>
+              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            </span>
+          </div>
+        }
 
-        <div className="cellText"
-          style={{ maxWidth: cellSize }}
-        >
-          <span title={cellText}>
-            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-          </span>
-        </div>
 
 
       </div>
