@@ -34,7 +34,8 @@
       "import": "./dist/index.es.js",
       "require": "./dist/uiobject_editor.cjs.js"
     },
-    "./style.css": "./dist/style.css"
+    "./style.css": "./dist/style.css",
+    "./dist/*": "./dist/*"
   },
   "files": [
     "dist"
@@ -80,7 +81,7 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
     "prettier": "^3.2.5",
-    "react-gptable": "^1.0.7",
+    "react-gptable": "^1.0.8",
     "stylelint": "^16.2.1",
     "stylelint-config-recommended": "^14.0.0",
     "stylelint-config-sass-guidelines": "^11.0.0",
@@ -88,7 +89,6 @@
     "typescript": "^5.3.3",
     "vite": "^5.1.4",
     "vite-plugin-dts": "^3.7.3",
-    "vite-plugin-sass-dts": "^1.3.17",
     "vite-tsconfig-paths": "^4.3.2"
   }
 }
