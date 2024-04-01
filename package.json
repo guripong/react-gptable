@@ -69,6 +69,7 @@
     "@babel/preset-env": "^7.24.3",
     "@emotion/babel-plugin": "^11.11.0",
     "@emotion/react": "^11.11.4",
+    "@faker-js/faker": "^8.4.1",
     "@rollup/plugin-babel": "^6.0.4",
     "@types/lodash": "^4.17.0",
     "@types/node": "^20.11.24",

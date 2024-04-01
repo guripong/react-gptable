@@ -1,14 +1,16 @@
 
 import React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-// import { GPtable, IndeterminateCheckbox } from './lib';
-// import type { GPTableInstance, GPColumn } from './lib';
+import { GPtable, IndeterminateCheckbox } from './lib';
+import type { GPTableInstance, GPColumn } from './lib';
 import "./App.scss"
 
-import { GPtable } from 'react-gptable';
-import type { GPColumn, GPTableInstance } from 'react-gptable';
-import "react-gptable/dist/style.css";
+// import { GPtable } from 'react-gptable';
+// import type { GPColumn, GPTableInstance } from 'react-gptable';
+// import "react-gptable/dist/style.css";
 
+// ESM
+import { faker } from '@faker-js/faker';
 
 type Person = {
   data_idx: number
@@ -142,7 +144,21 @@ function App() {
     return originArr;
   }, []);
 
-  const [data, setData] = useState<Person[]>(() => [{
+  const [data, setData] = useState<Person[]>(() => {
+    function createRandomUser(){
+      return {
+        data_idx: faker.number.int(),
+        firstName: faker.internet.userName(),
+        lastName: faker.internet.userName(),
+        age:faker.number.int({min:5,max:40}),
+      };
+    }
+    let d:Person[]= faker.helpers.multiple(createRandomUser, {
+      count: 5000,
+    });
+    console.log("d",d)
+
+    return [{
     data_idx: 1,
     firstName: "소1111111111111111111111111",
     lastName: "기영",
@@ -165,7 +181,7 @@ function App() {
     firstName: "정",
     lastName: "연광",
     age: 3,
-  }]);
+  },...d]});
 
   const gptableRef = useRef<GPTableInstance>(null);
 
