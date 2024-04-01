@@ -3,6 +3,11 @@ import { ForwardRefExoticComponent } from 'react';
 /**
  * 한번에 다 만들고 달아줘
  * **/
+
+interface GPInstanceResponse{
+    valid:boolean;
+    msg?:string;
+}
 interface GPTableInstance {
     /**
     * 숫자를 입력받아 1을 더한 값을 반환합니다.
@@ -17,6 +22,8 @@ interface GPTableInstance {
     setLoading:(value:boolean)=>void;
     set_columnOrder?: ([]:Array<any>) => void;
     get_columnOrder?: () => any;
+
+    set_customFilter : (id:string,filter:string|[string,string]) =>GPInstanceResponse;
 }
 
 

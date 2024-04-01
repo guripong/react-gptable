@@ -1,5 +1,5 @@
 import React, { CSSProperties, forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useReducer, useRef, useState } from 'react';
-import { GPColumn, GPTableInstance, GPtableProps } from './GPTableTypes';
+import type { GPColumn, GPTableInstance, GPtableProps } from './GPTableTypes';
 import {
   Column,
   Table,
@@ -11,31 +11,22 @@ import {
   getFacetedUniqueValues,
   getFacetedMinMaxValues,
   getPaginationRowModel,
-  sortingFns,
   getSortedRowModel,
-  FilterFn,
-  SortingFn,
   ColumnDef,
   flexRender,
   Header,
   Cell,
-  CellContext,
   ColumnSort,
   PaginationState,
   RowSelectionState,
+  VisibilityState,
+  ColumnSizingState,
+  ColumnOrderState,
+  TableState,
   // FilterFns,
 } from '@tanstack/react-table'
 
-import {
-  RankingInfo,
-  rankItem,
-  compareItems,
-} from '@tanstack/match-sorter-utils'
-
 import "./GPtable.scss";
-
-import DebouncedInput from './components/DebouncedInput/DebouncedInput';
-
 
 //dnd 사용예시
 //https://codesandbox.io/p/devbox/github/tanstack/table/tree/main/examples/react/column-dnd?embed=1&file=%2Fsrc%2Fmain.tsx%3A138%2C4&theme=light
@@ -64,91 +55,13 @@ import IndeterminateCheckbox from './components/IndeterminateCheckbox/Indetermin
 
 import _ from "lodash";
 import { fuzzyFilter } from './filters/filter';
+// import {Filter} from './filters/Filter';
+
 import { loadTable } from './utils/loadTable';
 import Loading from './components/Loading/Loading';
 import GPtableToolbar from './toolbar/GPtableToolbar';
-
-
-
-function Filter({
-  column,
-  table,
-}: {
-  column: Column<any, unknown>
-  table: Table<any>
-}) {
-  const firstValue = table
-    .getPreFilteredRowModel()
-    .flatRows[0]?.getValue(column.id)
-
-  const columnFilterValue = column.getFilterValue()
-
-  const sortedUniqueValues = React.useMemo(
-    () =>
-      typeof firstValue === 'number'
-        ? []
-        : Array.from(column.getFacetedUniqueValues().keys()).sort(),
-    [column.getFacetedUniqueValues()]
-  )
-  // console.log("firstValue", firstValue)
-
-  return typeof firstValue === 'number' ? (
-    <div>
-      <div className="numberFilter">
-
-        <DebouncedInput
-          type="number"
-          min={Number(column.getFacetedMinMaxValues()?.[0] ?? '')}
-          max={Number(column.getFacetedMinMaxValues()?.[1] ?? '')}
-          value={(columnFilterValue as [number, number])?.[0] ?? ''}
-          onChange={value =>
-            column.setFilterValue((old: [number, number]) => [value, old?.[1]])
-          }
-          placeholder={`Min ${column.getFacetedMinMaxValues()?.[0]
-            ? `(${column.getFacetedMinMaxValues()?.[0]})`
-            : ''
-            }`}
-          className="gp_input"
-        />
-        ~
-        <DebouncedInput
-          type="number"
-          min={Number(column.getFacetedMinMaxValues()?.[0] ?? '')}
-          max={Number(column.getFacetedMinMaxValues()?.[1] ?? '')}
-          value={(columnFilterValue as [number, number])?.[1] ?? ''}
-          onChange={value =>
-            column.setFilterValue((old: [number, number]) => [old?.[0], value])
-          }
-          placeholder={`Max ${column.getFacetedMinMaxValues()?.[1]
-            ? `(${column.getFacetedMinMaxValues()?.[1]})`
-            : ''
-            }`}
-          className="gp_input"
-        />
-      </div>
-
-    </div>
-  ) : (
-    <>
-      <datalist id={column.id + 'list'}>
-        {sortedUniqueValues.slice(0, 100).map((value: any, index) => (
-          <option value={value} key={value + `_${index}`} />
-        ))}
-      </datalist>
-      <DebouncedInput
-        type="text"
-        value={(columnFilterValue ?? '') as string}
-        onChange={value => column.setFilterValue(value)}
-        placeholder={`Search... (${column.getFacetedUniqueValues().size})`}
-        className="gp_input"
-        list={column.id + 'list'}
-      />
-    </>
-  )
-}
-
-
-
+import Pagination from './pagination/Pagination';
+import CommonFilter from './filters/CommonFilter';
 
 /**
     * Gptable props 설명
@@ -274,13 +187,11 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
 
 
 
-
   const [globalFilter, setGlobalFilter] = useState<any>('');
-  const [columnOrder, setColumnOrder] = React.useState<string[]>([])
-  const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>({})
-  const [columnSizing, setColumnSizing] = useState<Record<string, number>>({});
+  const [columnOrder, setColumnOrder] = React.useState<ColumnOrderState>([])
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});
   const [sorting, setSorting] = useState<ColumnSort[]>([]);
-  //sort remember
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   // console.log("sorting",sorting);
   // console.log("columnFilters", columnFilters)
@@ -288,8 +199,31 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [selectedRow, setSelectedRow] = useState(null); //한줄
 
+  //컬럼의 visibility 가 보이다가 안보일때 필터도 제거하는부분
+  const beforeColumnVisibility = useRef(columnVisibility);
+  useEffect(() => {
+    for (const key in beforeColumnVisibility.current) {
+      if (beforeColumnVisibility.current[key] && !columnVisibility[key]) {
+        //보이다가 숨겼을땐 필터도 제거해야함
+        setColumnFilters(prevFilters => prevFilters.filter(filter => filter.id !== key));
+      }
+    }
+    beforeColumnVisibility.current = columnVisibility;
 
-  // console.log("selectedRows",selectedRows)
+
+  }, [columnVisibility, columnFilters]);
+
+  useEffect(()=>{
+    if(usePagination){
+      setPagination(p=>{
+        return {
+          ...p,
+          pageIndex:0
+        }
+      })
+    }
+
+  },[columnFilters,usePagination])
 
 
   const icolumn = useMemo<GPColumn[]>(() => {
@@ -475,7 +409,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     autoResetAll: false,
     defaultColumn: {
       // size:300,
-      // minSize: 40,
+      minSize: 20,
       // maxSize:500,
     },
     state: {
@@ -533,13 +467,6 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
 
   });
 
-  const getMultipleSelectRowsOrginal = useCallback(() => {
-    const prevSelectedRows = Object.keys(rowSelection).map(
-      (key) =>
-        table.getSelectedRowModel().rowsById[key]?.original || []
-    )
-    return prevSelectedRows;
-  }, [rowSelection, table]);
 
 
   // console.log("rows",rows)
@@ -755,6 +682,14 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
 
 
 
+  const getMultipleSelectRowsOrginal = useCallback(() => {
+    const prevSelectedRows = Object.keys(rowSelection).map(
+      (key) =>
+        table.getSelectedRowModel().rowsById[key]?.original || []
+    )
+    return prevSelectedRows;
+  }, [rowSelection, table]);
+
 
   useImperativeHandle(ref, () => {
     return {
@@ -775,7 +710,54 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
       },
       setLoading: (val: boolean) => {
         set_loading(val);
+      },
+      set_customFilter: (id, filter) => {
+        //컬럼리스트중에 해당 ID가 있는지 확인
+        //없으면  valid false , msg 해당 컬럼에 해당 id가 없습니다
+        //해당 ID가 visibility false이면 
+        //해당컬럼이 보이지않아서 필터를 걸 수 없습니다
+        const visibleColumn = table.getAllLeafColumns();
+        let isColumnExist = visibleColumn.find(c => c.id === id);
+        if (!isColumnExist) {
+          return {
+            valid: false,
+            msg: `${id} 컬럼이 존재하지 않습니다`
+          }
+        }
+        let tableState:TableState = table.getState();
+        let { columnFilters, columnVisibility } =tableState;
+        // console.log("tableState",tableState)
+        // let obj = table.getState(), { columnFilters, columnVisibility } = obj;
+
+
+        let isTargetFilterHide = columnVisibility[id] === false;
+        if (isTargetFilterHide) {
+          return {
+            valid: false,
+            msg: `${id} 컬럼이 숨겨진상태라 필터를 걸 수 없습니다`
+          }
+        }
+        //필터 타입을 확인해야하는데..
+        //해당 필터가 무엇인지?
+        setColumnFilters(prevFilters => {
+          const existingFilterIndex = prevFilters.findIndex(column => column.id === id);
+
+          if (existingFilterIndex !== -1) {
+            // If the filter exists, update its value
+            prevFilters[existingFilterIndex].value = filter;
+          } else {
+            // If the filter doesn't exist, add it to the array
+            prevFilters.push({ id: id, value: filter });
+          }
+          return [...prevFilters]; // Ensure returning a new array to trigger re-render
+        });
+        return {
+          valid: true,
+          msg: "성공"
+        };
       }
+
+
       // set_columnOrder: (newOrder) => {
       //   table.setColumnOrder(newOrder);
       // },
@@ -784,8 +766,6 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
       // }
     }
   }, [table]);
-
-
 
 
   //drag and drop sensor 컬럼순서바꾸기
@@ -813,7 +793,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     }
   }
 
-
+  // console.log("columns.length",columns.length)
   // console.log("pagination",pagination);
   // console.log("랜더")
   return (
@@ -861,7 +841,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
                   >
                     {headerGroup.headers.map(header => {
                       return (
-                        <DraggableTableHeader key={header.id} header={header} table={table}
+                        <GP_Header key={header.id} header={header} table={table}
                           enableResizingColumn={enableResizingColumn}
                           enableOrderingColumn={enableOrderingColumn}
                         />
@@ -890,7 +870,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
                           items={columnOrder}
                           strategy={horizontalListSortingStrategy}
                         >
-                          <DragAlongCell key={cell.id} cell={cell}
+                          <GP_Cell key={cell.id} cell={cell}
 
                             onClick={(e) => {
                               setSelectedRow(row.original);
@@ -914,75 +894,12 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
 
         {/* pagination */}
         {usePagination &&
-          <div className="pagination">
-
-            <button
-              className="prev"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              {'<'}
-            </button>
-            <div className="middle">
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                Page&nbsp;
-                <input
-                  className="nowPage"
-                  type="number"
-                  max={table.getPageCount() || undefined}
-                  value={pagination.pageIndex + 1}
-                  onChange={e => {
-                    // let max = table.getPageCount()-1;
-                    // console.log("max",max)
-                    let page = e.target.value ? Number(e.target.value) - 1 : 0;
-                    // console.log("page",page)
-                    // if(page>=max){
-                    //   page=max;
-                    // }
-                    setPagination(p => {
-                      return {
-                        ...p,
-                        pageIndex: page
-                      }
-                    })
-                    // table.setPageIndex(page)
-                  }}
-                />
-                &nbsp;of&nbsp;{table.getPageCount()}
-              </div>
-
-              <div style={{ marginLeft: '10%' }}>
-                <select
-                  className="viewRows"
-                  value={pagination.pageSize}
-                  onChange={e => {
-                    setPagination(p => {
-
-                      return {
-                        ...p,
-                        pageSize: Number(e.target.value)
-                      };
-                    })
-                    // table.setPageSize(Number(e.target.value))
-                  }}
-                >
-                  {paginationArr.map(pageSize => (
-                    <option key={pageSize} value={pageSize}>
-                      {pageSize} rows
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <button
-              className="next"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              {'>'}
-            </button>
-          </div>
+          <Pagination
+            setPagination={setPagination}
+            table={table}
+            pagination={pagination}
+            paginationArr={paginationArr}
+          />
         }
       </div>
 
@@ -991,7 +908,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
 });
 
 
-const DraggableTableHeader = ({
+const GP_Header = ({
   header, table, enableResizingColumn, enableOrderingColumn
 }: {
   header: Header<any, unknown>;
@@ -1103,14 +1020,14 @@ const DraggableTableHeader = ({
       {/* 필터 */}
       {columnDef?.useFilter && header.column.getCanFilter() ? (
         <div className="filterWrap">
-          <Filter column={header.column} table={table} />
+          <CommonFilter column={header.column} table={table} />
         </div>
       ) : null}
     </th>
   )
 }
 
-const DragAlongCell = ({ cell, onClick }:
+const GP_Cell = ({ cell, onClick }:
   {
     cell: Cell<any, unknown>;
     onClick: (event: React.MouseEvent<HTMLTableCellElement, MouseEvent>) => void;

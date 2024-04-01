@@ -177,6 +177,7 @@ const GPtableToolbar: React.FC<GPtableToolbarProps> = (props) => {
 
     },[table,data]);
 
+    
 
     return (<div className="tableToolbar">
         {globalfilter &&
@@ -226,8 +227,9 @@ const GPtableToolbar: React.FC<GPtableToolbarProps> = (props) => {
                         <button className="btn-download"  onClick={() => downloadcsv('all')}>
                             <svg version="1.1" xmlns="http://www.w3.org/2000/svg"
                                 xmlnsXlink="http://www.w3.org/1999/xlink"
-                                x="0px" y="0px" viewBox="0 0 115.28 122.88" xmlSpace="preserve" style={{
-                                    fillRule: "evenodd", clipRule: "evenodd", height: '80%'
+                                x="0px" y="0px" viewBox="0 0 115.28 122.88" xmlSpace="preserve" 
+                                style={{
+                                    fillRule: "evenodd", clipRule: "evenodd", height: '20px'
                                     , color: 'green'
                                 }}
                                 fill="currentColor">
@@ -241,7 +243,7 @@ const GPtableToolbar: React.FC<GPtableToolbarProps> = (props) => {
                             <svg version="1.1" xmlns="http://www.w3.org/2000/svg"
                                 xmlnsXlink="http://www.w3.org/1999/xlink"
                                 x="0px" y="0px" viewBox="0 0 115.28 122.88" xmlSpace="preserve" style={{
-                                    fillRule: "evenodd", clipRule: "evenodd", height: '80%'
+                                    fillRule: "evenodd", clipRule: "evenodd", height: '20px'
                                     , color: 'green'
                                 }}
                                 fill="currentColor">
@@ -311,6 +313,8 @@ const GPtableToolbar: React.FC<GPtableToolbarProps> = (props) => {
                             // if(CD.enableOrdering===false){
                             //   return null;
                             // }
+                            
+              
 
                             return (
                                 <div key={column.id} className="onecheckColumn">

@@ -23,8 +23,6 @@ type Person = {
 //   GPColumn}  from 'react-gptable'
 
 
-
-
 function App() {
 
 
@@ -209,6 +207,11 @@ function App() {
 
   },[]);
 
+  const setCustomFilter = useCallback(()=>{
+    let res=gptableRef.current?.set_customFilter("age",['','5']);
+    console.log("res",res)
+    // let res2=gptableRef.current?.set_customFilter("firstName",'소');
+  },[])
 
   useEffect(()=>{
     // console.log("여기랜더")
@@ -241,8 +244,6 @@ function App() {
         //필터값 기억한다 default
 
 
-
-
         option={{
           //saveTable:"asf", //잇을때만 저장
           //저장할때는 width 순서 hide   // sort안하고
@@ -269,6 +270,7 @@ function App() {
             render: () => {
               return (<>
                 <button className="btn btn-green" onClick={refreshdata}>새로고침</button>
+                <button className="btn btn-red" onClick={setCustomFilter}>나이 max5 필터 걸기</button>
                 {/* <button className="btn btn-orange" disabled={true}>테이블저장</button> */}
               </>)
             }
@@ -277,86 +279,6 @@ function App() {
 
 
       />
-
-
-    </div>
-    <br />
-    2번테이블 아래
-    <div style={{ width: '800px', display: "flex", background: "#fff" }}>
-
-      {/* <GPtable
-        className="hoho2"
-        ref={gptableRef2}
-
-        data={data}
-        column={column}
-        
-        onClickRow={(e,row,cell)=>{
-          // console.log("클릭row",row);
-          // console.log("클릭cell",cell);
-        }}
-
-
-        option={{
-          //saveTable:"asf", //잇을때만 저장
-          //저장할때는 width 순서 hide   // sort안하고
-          autoSavetableName:"oppa2",
-          //컬럼순서 
-          row:{
-            rememberSelRow:true, //default true
-            selRowColor:"#666",
-            selRowBackground:"rgba(255,0,0,.1)", //1줄선택로우 배경색 default transparent         
-            multipleSelRowCheckbox:true, //다중 선택row default false
-          },
-          column:{
-            resizing:true, //모든컬럼 리사이징 가능여부 default true
-            ordering:true, //모든컬럼 오더링 가능여부 default true
-          },
-          pagination: {
-            paginationArr: [1,2, 3, 10, 50], //default 10,20,30,40
-            defaultPageSize: 2,  //default = paginationArr[0]
-          },
-          toolbar: {
-            globalfilter: true,//default false
-            columnAttributeButton: true,// defaulte false,
-            render: () => {
-              return (<>
-                <button className="btn btn-green" onClick={()=>{
-                  console.log("새로고친후 체크값들 기억X")
-                  setData([
-                    {
-                    firstName: "소",
-                    lastName: "기영",
-                    age: 24,
-                    mycheckbox2: 1,
-                    something: 1,
-                  }, 
-                  {
-                    firstName: "박",
-                    lastName: "서하",
-                    age: -5,
-                  }, 
-                  {
-                    firstName: "류",
-                    lastName: "기정",
-                    age: 14,
-                
-                  }, {
-                    firstName: "정",
-                    lastName: "연광",
-                    age: 3,
-                  }])
-                }}>새로고침</button>
-          
-              </>)
-            }
-          }
-        }}
-
-
-      /> */}
-
-
     </div>
   </div>)
 }
