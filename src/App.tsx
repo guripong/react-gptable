@@ -1,12 +1,17 @@
+
+import React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { GPtable, IndeterminateCheckbox, } from './lib';
+import { GPtable, IndeterminateCheckbox } from './lib';
 import type { GPTableInstance, GPColumn } from './lib';
 import "./App.scss"
 
-import type { } from 'react'; // cost
 
+// import { GPtable } from 'react-gptable';
+// import type { GPColumn, GPTableInstance } from 'react-gptable';
+
+// import "react-gptable/dist/style.css";
 type Person = {
-  data_idx:number
+  data_idx: number
   firstName: string
   lastName: string
   age?: number
@@ -29,7 +34,7 @@ function App() {
   const column: GPColumn[] = useMemo(() => {
     let originArr: GPColumn[] = [
       {
-        pKey:true,
+        pKey: true,
         Header: "pKeyidx",
         accessorKey: "data_idx", //key name
         useSort: false, // default true
@@ -137,26 +142,26 @@ function App() {
     return originArr;
   }, []);
 
-  const [data, setData] = useState<Person[]>(()=>[{
-    data_idx:1,
+  const [data, setData] = useState<Person[]>(() => [{
+    data_idx: 1,
     firstName: "소1111111111111111111111111",
     lastName: "기영",
     age: 24,
     mycheckbox2: 1,
     something: 1,
   }, {
-    data_idx:2,
+    data_idx: 2,
     firstName: "박",
     lastName: "서하",
     age: -5,
   }, {
-    data_idx:3,
+    data_idx: 3,
     firstName: "류",
     lastName: "기정",
     age: 14,
 
   }, {
-    data_idx:4,
+    data_idx: 4,
     firstName: "정",
     lastName: "연광",
     age: 3,
@@ -181,41 +186,41 @@ function App() {
     setTimeout(function () {
       gptableRef.current?.setLoading(false);
       setData([{
-          data_idx:2,
-          firstName: "박",
-          lastName: "서하",
-          age: -5,
-        }, {
-          data_idx:3,
-          firstName: "류",
-          lastName: "기정",
-          age: 14,
-      
-        }, {
-          data_idx:4,
-          firstName: "정",
-          lastName: "연광",
-          age: 3,
-        },{
-          data_idx:1,
-          firstName: "소",
-          lastName: "기광",
-          age: 3,
-        }])
+        data_idx: 2,
+        firstName: "박",
+        lastName: "서하",
+        age: -5,
+      }, {
+        data_idx: 3,
+        firstName: "류",
+        lastName: "기정",
+        age: 14,
+
+      }, {
+        data_idx: 4,
+        firstName: "정",
+        lastName: "연광",
+        age: 3,
+      }, {
+        data_idx: 1,
+        firstName: "소",
+        lastName: "기광",
+        age: 3,
+      }])
 
     }, 600);
 
-  },[]);
+  }, []);
 
-  const setCustomFilter = useCallback(()=>{
-    let res=gptableRef.current?.set_customFilter("age",['','5']);
-    console.log("res",res)
+  const setCustomFilter = useCallback(() => {
+    let res = gptableRef.current?.set_customFilter("age", ['', '5']);
+    console.log("res", res)
     // let res2=gptableRef.current?.set_customFilter("firstName",'소');
-  },[])
+  }, [])
 
-  useEffect(()=>{
+  useEffect(() => {
     // console.log("여기랜더")
-  },[])
+  }, [])
 
 
   return (<div className="app" style={{ background: "#eee" }} >
@@ -266,7 +271,7 @@ function App() {
           toolbar: {
             globalfilter: true,//default false
             columnAttributeButton: true,// defaulte false,
-            saveExcelButton : true, //default false,            
+            saveExcelButton: true, //default false,            
             render: () => {
               return (<>
                 <button className="btn btn-green" onClick={refreshdata}>새로고침</button>
