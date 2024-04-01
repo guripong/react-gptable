@@ -23,7 +23,9 @@
     "noImplicitReturns": false,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src"],
-  "exclude": ["node_modules"],
+  // "include": ["src"],
+  // "exclude": ["node_modules"],
+  "include": ["src/lib"],
+  "exclude": ["**/*.stories.tsx"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
