@@ -9,10 +9,10 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 export default defineConfig({
   base: "./",
   plugins: [
-    // dts({ rollupTypes: true }),
-    dts({
-      insertTypesEntry: true, // 컴포넌트 타입 생성
-    }),
+    dts({ rollupTypes: true }),
+    // dts({
+    //   insertTypesEntry: true, // 컴포넌트 타입 생성
+    // }),
     tsconfigPaths(), // 절대 경로 생성시 사용된다. 
     react(),
     // sassDts(),

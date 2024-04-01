@@ -5,11 +5,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 // import type { GPTableInstance, GPColumn } from './lib';
 import "./App.scss"
 
-
 import { GPtable } from 'react-gptable';
 import type { GPColumn, GPTableInstance } from 'react-gptable';
-// import "react-gptable/dist/style.scss"
-// import "react-gptable/dist/style.css";
+import "react-gptable/dist/style.css";
+
+
 type Person = {
   data_idx: number
   firstName: string
