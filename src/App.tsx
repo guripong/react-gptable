@@ -1,14 +1,14 @@
 
 import React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { GPtable, IndeterminateCheckbox } from './lib';
-import type { GPTableInstance, GPColumn } from './lib';
+// import { GPtable, IndeterminateCheckbox } from './lib';
+// import type { GPTableInstance, GPColumn } from './lib';
 import "./App.scss"
 
 
-// import { GPtable } from 'react-gptable';
-// import type { GPColumn, GPTableInstance } from 'react-gptable';
-
+import { GPtable } from 'react-gptable';
+import type { GPColumn, GPTableInstance } from 'react-gptable';
+// import "react-gptable/dist/style.scss"
 // import "react-gptable/dist/style.css";
 type Person = {
   data_idx: number

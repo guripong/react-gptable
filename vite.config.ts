@@ -3,6 +3,7 @@ import path from "path";
 import react from "@vitejs/plugin-react";
 import { defineConfig, UserConfig } from "vite";
 import tsconfigPaths from 'vite-tsconfig-paths';
+import sassDts from 'vite-plugin-sass-dts'
 //https://velog.io/@seonye-98/npm-%EB%9D%BC%EC%9D%B4%EB%B8%8C%EB%9F%AC%EB%A6%AC-%EB%B0%B0%ED%8F%AC-React-%EC%BB%B4%ED%8F%AC%EB%84%8C%ED%8A%B8-%EB%9D%BC%EC%9D%B4%EB%B8%8C%EB%9F%AC%EB%A6%AC-%EB%B0%B0%ED%8F%AC%EC%A0%84-%EC%84%A4%EC%A0%95
 
 export default defineConfig({
@@ -14,6 +15,7 @@ export default defineConfig({
     }),
     tsconfigPaths(), // 절대 경로 생성시 사용된다. 
     react(),
+    sassDts(),
     // react({
       // jsxImportSource: '@emotion/react',
       // babel: {
