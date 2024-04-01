@@ -1,6 +1,6 @@
 {
   "name": "react-gptable",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "gptable",
   "private": false,
   "author": "guripong",
@@ -34,7 +34,7 @@
       "import": "./dist/index.es.js",
       "require": "./dist/uiobject_editor.cjs.js"
     },
-    "./style.css":"./dist/style.css"
+    "./style.css": "./dist/style.css"
   },
   "files": [
     "dist"
