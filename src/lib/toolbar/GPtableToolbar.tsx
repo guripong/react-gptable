@@ -281,14 +281,9 @@ const GPtableToolbar: React.FC<GPtableToolbarProps> = (props) => {
                 {
                     showColumnAttribute &&
                     <div className="columnAttribute" >
-                        <div>
-                            order,sizing,visible,
-                            sorting,filter는 <br />초기화 완료
-
-                            <br />
-                            selectrow와 mutiplecheckbox는?
-                            <br />
-                            <button onClick={resetAllColumnAttributes}>컬럼 초기화</button>
+                        <div style={{display:"flex",justifyContent:"center",alignItems:"center",marginRight:5}}>
+                      
+                            <button className="btn" onClick={resetAllColumnAttributes}>컬럼 초기화</button>
                         </div>
                         <div className="onecheckColumn">
                             <BounceCheckBox
