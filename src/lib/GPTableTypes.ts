@@ -238,8 +238,8 @@ interface GPtableOption {
         selRowBackground?: string;
         multipleSelRowCheckbox?: boolean;
         rememberSelRow?: boolean;
-        hoverSelRowColor?: string;
-        hoverSelRowBackground?: string;
+        hoverRowColor?: string;
+        hoverRowBackground?: string;
     }
     column?: {
         resizing?: boolean;

@@ -118,6 +118,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     enableResizingColumn, enableOrderingColumn,
     //row 옵션
     rememberSelRow, selRowBackground, selRowColor, multipleSelRowCheckbox,
+    hoverRowBackground,hoverRowColor,
     //테이블 자동저장옵션
     autoSavetableName
   } = useMemo(() => {
@@ -129,6 +130,8 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
         selRowColor: "#000",
         selRowBackground: "#fff",
         multipleSelRowCheckbox: false,
+        hoverRowColor:"#000",
+        hoverRowBackground:"#fff",
       },
       column: {
         resizing: true,
@@ -160,8 +163,11 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     const enableOrderingColumn = option?.column?.ordering ?? true;
 
     const rememberSelRow = option.row.rememberSelRow;
-    const selRowBackground = option.row?.selRowBackground ?? "#fff";
-    const selRowColor = option.row?.selRowColor ?? "#000";
+    const selRowBackground = option.row?.selRowBackground;
+    const selRowColor = option.row?.selRowColor;
+    const hoverRowColor = option.row?.hoverRowColor;
+    const hoverRowBackground = option.row?.hoverRowBackground;
+
 
     const multipleSelRowCheckbox = option.row.multipleSelRowCheckbox ?? false;
 
@@ -180,11 +186,13 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
       selRowColor,
       multipleSelRowCheckbox,
       autoSavetableName,
-      saveExcelButton
+      saveExcelButton,
+      hoverRowColor,
+      hoverRowBackground
     };
   }, [userOptions]);
 
-  console.log("enableOrderingColumn",enableOrderingColumn)
+  // console.log("enableOrderingColumn",enableOrderingColumn)
   const gpTableWrapRef = useRef<HTMLDivElement>(null);
 
 
@@ -912,8 +920,12 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
               {!loading && table.getRowModel().rows.map(row => {
                 const isSelRow = row.original === selectedRow;
                 // console.log("row",row)
+                //hoverRowBackground
+                //hoverRowColor
                 return (
-                  <tr key={row.id} style={{ background: isSelRow ? selRowBackground : "", color: isSelRow ? selRowColor : "" }}>
+                  <tr key={row.id} 
+                  
+                    style={{ background: isSelRow ? selRowBackground : "", color: isSelRow ? selRowColor : "" }}>
                     {row.getVisibleCells().map(cell => {
                       // console.log("cell",cell)
                       return (

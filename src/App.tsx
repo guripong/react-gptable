@@ -244,8 +244,8 @@ function App() {
         rememberSelRow: true, //default true //한줄선택 기억 pKey가 있다면
         selRowColor: "#666",            
         selRowBackground: "rgba(255,0,0,.1)", //1줄선택로우 배경색 default transparent         
-        hoverSelRowColor:"#fff",
-        hoverSelRowBackground:"red",
+        hoverRowColor:"#fff",
+        hoverRowBackground:"red",
         multipleSelRowCheckbox: true, //다중 선택row default false
 
       },
