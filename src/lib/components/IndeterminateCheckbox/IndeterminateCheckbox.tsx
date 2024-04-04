@@ -14,6 +14,7 @@ function IndeterminateCheckbox({
 
   useEffect(() => {
     if (typeof indeterminate === 'boolean') {
+      // console.log("동작")
       ref.current.indeterminate = !rest.checked && indeterminate;
     }
   }, [ref, indeterminate, rest.checked]);

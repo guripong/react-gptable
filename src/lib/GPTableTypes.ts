@@ -142,6 +142,9 @@ interface GPtableProps<T> {
     column: GPColumn[]; // 여기서 컬럼의 타입을 정확히 지정해야 합니다.
     data: T[]; // 데이터의 타입도 정확히 지정해야 합니다.
 
+    onCheckRow?:(rows: any[] )=>any;
+
+
     onClickRow?: (e: React.MouseEvent<HTMLTableCellElement, MouseEvent>, row: any , cell:any) => void; // 클릭된 행의 타입을 정확히 지정해야 합니다.
     /** 
     *   - row: 행 관련 옵션 설정입니다.

@@ -11,6 +11,7 @@ import "./App.scss"
 
 // ESM
 import { faker } from '@faker-js/faker';
+import { sample } from 'lodash';
 
 type Person = {
   data_idx: number
@@ -32,7 +33,7 @@ type Person = {
 
 function App() {
 
-
+  const [selRow,setSelRow] = useState(null);
   const column: GPColumn[] = useMemo(() => {
     let originArr: GPColumn[] = [
       {
@@ -156,7 +157,7 @@ function App() {
     let d:Person[]= faker.helpers.multiple(createRandomUser, {
       count: 5000,
     });
-    console.log("d",d)
+    // console.log("d",d)
 
     return [{
     data_idx: 1,
@@ -185,16 +186,6 @@ function App() {
 
   const gptableRef = useRef<GPTableInstance>(null);
 
-  useEffect(() => {
-    // console.log("gptableRef", gptableRef);
-    if (gptableRef?.current) {
-      const tableRef = gptableRef.current;
-      // const gptable=tableRef.getTable();
-      // console.log(tableRef.test(2));
-      // console.log(gptable.setPageIndex(0));
-      // tableRef.setLoading(false);
-    }
-  }, [gptableRef])
 
   const refreshdata = useCallback(() => {
     // console.log("새로고친후 체크값들 기억X")
@@ -232,12 +223,14 @@ function App() {
     let res = gptableRef.current?.set_customFilter("age", ['', '5']);
     console.log("res", res)
     // let res2=gptableRef.current?.set_customFilter("firstName",'소');
-  }, [])
+  }, []);
 
-  useEffect(() => {
-    // console.log("여기랜더")
-  }, [])
 
+  const handleOnCheckRow = useCallback((rows:Person[])=>{
+    console.log("허허허rows",rows)
+  },[])
+  
+  // console.log("랜더")
 
   return (<div className="app" style={{ background: "#eee" }} >
     {/* {"isOdd사용후:" + isOdd(4)} */}
@@ -254,9 +247,11 @@ function App() {
         data={data}
         column={column}
 
+        onCheckRow={handleOnCheckRow}
         onClickRow={(e, row, cell) => {
           // console.log("클릭row",row);
           // console.log("클릭cell",cell);
+          setSelRow(row);
         }}
 
         //새로고침시 체크 됨 날라가고 pkey
@@ -290,8 +285,8 @@ function App() {
             saveExcelButton: true, //default false,            
             render: () => {
               return (<>
-                <button className="btn" onClick={()=>{
-                  
+                <button className="btn" 
+                onClick={()=>{
                   gptableRef?.current?.removeSelectedMultipleRows();
                 }}>제거 checkmultipleRows</button>
                 <button className="btn" onClick={()=>{

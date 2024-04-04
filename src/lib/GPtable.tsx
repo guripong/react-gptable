@@ -1,4 +1,4 @@
-import React, { CSSProperties, forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useReducer, useRef, useState } from 'react';
+import React, { CSSProperties, forwardRef, memo, useCallback, useEffect, useImperativeHandle, useMemo, useReducer, useRef, useState } from 'react';
 import type { GPColumn, GPTableInstance, GPtableProps } from './GPTableTypes';
 import {
   Column,
@@ -73,7 +73,7 @@ import CommonFilter from './filters/CommonFilter';
     * @param option 테이블에 대한 옵션 설정
     * @see {@link GPtableProps}
 */
-const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
+const GPtable = memo(forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
   const { className,
     column: beforeload_column = [{
       Header: "column1",
@@ -86,6 +86,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     }],
     data: data = [],
     onClickRow,
+    onCheckRow,
     option: userOptions = undefined,
   } = props;
 
@@ -105,72 +106,71 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     rememberSelRow, selRowBackground, selRowColor, multipleSelRowCheckbox,
     //테이블 자동저장옵션
     autoSavetableName
-  }
-    = useMemo(() => {
+  } = useMemo(() => {
 
-      const defaultOptions = {
-        autoSavetableName: null,
-        row: {
-          rememberSelRow: true,
-          selRowColor: "#000",
-          selRowBackground: "#fff",
-          multipleSelRowCheckbox: false,
-        },
-        column: {
-          resizing: true,
-          ordering: true,
-        },
-        pagination: null,
-        toolbar: {
-          globalfilter: false,
-          columnAttributeButton: false,
-          saveExcelButton: false,
-          render: null,
-        }
-      };
+    const defaultOptions = {
+      autoSavetableName: null,
+      row: {
+        rememberSelRow: true,
+        selRowColor: "#000",
+        selRowBackground: "#fff",
+        multipleSelRowCheckbox: false,
+      },
+      column: {
+        resizing: true,
+        ordering: true,
+      },
+      pagination: null,
+      toolbar: {
+        globalfilter: false,
+        columnAttributeButton: false,
+        saveExcelButton: false,
+        render: null,
+      }
+    };
 
-      const option = {
-        ...defaultOptions,
-        ...userOptions
-      };
+    const option = {
+      ...defaultOptions,
+      ...userOptions
+    };
 
-      const globalfilter = option?.toolbar?.globalfilter;
-      const columnAttributeButton = option?.toolbar?.columnAttributeButton;
-      const toolbarRender = option?.toolbar?.render;
-      const saveExcelButton = option?.toolbar?.saveExcelButton;
+    const globalfilter = option?.toolbar?.globalfilter;
+    const columnAttributeButton = option?.toolbar?.columnAttributeButton;
+    const toolbarRender = option?.toolbar?.render;
+    const saveExcelButton = option?.toolbar?.saveExcelButton;
 
-      const usePagination = option?.pagination || null;
-      const paginationArr = (usePagination?.paginationArr && Array.isArray(usePagination.paginationArr)) ? usePagination.paginationArr : [10, 20, 30, 40];
-      const defaultPageSize = Number.isInteger(usePagination?.defaultPageSize) ? usePagination?.defaultPageSize : paginationArr[0];
+    const usePagination = option?.pagination || null;
+    const paginationArr = (usePagination?.paginationArr && Array.isArray(usePagination.paginationArr)) ? usePagination.paginationArr : [10, 20, 30, 40];
+    const defaultPageSize = Number.isInteger(usePagination?.defaultPageSize) ? usePagination?.defaultPageSize : paginationArr[0];
 
-      const enableResizingColumn = option?.column?.resizing ?? true;
-      const enableOrderingColumn = option?.column?.ordering ?? true;
+    const enableResizingColumn = option?.column?.resizing ?? true;
+    const enableOrderingColumn = option?.column?.ordering ?? true;
 
-      const rememberSelRow = option.row.rememberSelRow;
-      const selRowBackground = option.row?.selRowBackground ?? "#fff";
-      const selRowColor = option.row?.selRowColor ?? "#000";
+    const rememberSelRow = option.row.rememberSelRow;
+    const selRowBackground = option.row?.selRowBackground ?? "#fff";
+    const selRowColor = option.row?.selRowColor ?? "#000";
 
-      const multipleSelRowCheckbox = option.row.multipleSelRowCheckbox ?? false;
+    const multipleSelRowCheckbox = option.row.multipleSelRowCheckbox ?? false;
 
-      const autoSavetableName = option.autoSavetableName;
+    const autoSavetableName = option.autoSavetableName;
 
-      return {
-        globalfilter,
-        columnAttributeButton,
-        toolbarRender,
-        usePagination,
-        paginationArr,
-        defaultPageSize,
-        enableResizingColumn,
-        enableOrderingColumn,
-        rememberSelRow,
-        selRowBackground,
-        selRowColor,
-        multipleSelRowCheckbox,
-        autoSavetableName,
-        saveExcelButton
-      };
-    }, [userOptions]);
+    return {
+      globalfilter,
+      columnAttributeButton,
+      toolbarRender,
+      usePagination,
+      paginationArr,
+      defaultPageSize,
+      enableResizingColumn,
+      enableOrderingColumn,
+      rememberSelRow,
+      selRowBackground,
+      selRowColor,
+      multipleSelRowCheckbox,
+      autoSavetableName,
+      saveExcelButton
+    };
+  }, [userOptions]);
 
 
   const gpTableWrapRef = useRef<HTMLDivElement>(null);
@@ -198,6 +198,15 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
 
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [selectedRow, setSelectedRow] = useState(null); //한줄
+  const [selMultipleRows,setSelMultipleRows] = useState<any[]>([]);
+
+  useEffect(()=>{
+    if(onCheckRow){
+      // console.log("selMultipleRows",selMultipleRows)
+      onCheckRow(selMultipleRows);
+    }
+  },[selMultipleRows,onCheckRow])
+
 
   //컬럼의 visibility 가 보이다가 안보일때 필터도 제거하는부분
   const beforeColumnVisibility = useRef(columnVisibility);
@@ -477,6 +486,10 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
   //data 변경시 pagination과, row selection변경
   useEffect(() => {
     // console.log("pagination 값 초기화")
+    // console.log("usePagination",usePagination)
+    // console.log("defaultPageSize",defaultPageSize)
+    // console.log("rememberSelRow",rememberSelRow)
+    // console.log("multipleSelRowCheckbox",multipleSelRowCheckbox)
     // console.log("바뀐data", data)
     function selectedRowsDone() {
       return new Promise(function (resolve) {
@@ -559,11 +572,18 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
 
     })
 
+  }, [data, usePagination, defaultPageSize,
+    rememberSelRow,
+    pKey, table])
+
+
+    //데이터바뀔시 체크박스 해제
+  useEffect(() => {
     if (multipleSelRowCheckbox) {
+      // console.log("비워")
       setRowSelection({});
     }
-  }, [data, usePagination, defaultPageSize, rememberSelRow, multipleSelRowCheckbox, pKey, table])
-
+  }, [multipleSelRowCheckbox,data])
 
 
 
@@ -627,10 +647,6 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     setGlobalFilter('');
     setColumnFilters([]);
 
-    //
-    // set_reloadColumn(true);
-    // rerender();
-    // table._autoResetPageIndex()
 
   }, [table, autoSavetableName, beforeload_column_initial, multipleSelRowCheckbox])
 
@@ -683,14 +699,17 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
   }, [debouncedSave, columnOrder, columnVisibility, columnSizing, sorting, columnFilters, pagination]);
 
 
-
-  const getMultipleSelectRowsOrginal = useCallback(() => {
-    const prevSelectedRows = Object.keys(rowSelection).map(
-      (key) =>
-        table.getSelectedRowModel().rowsById[key]?.original || []
+  useEffect(()=>{
+    //  console.log("rowSelection",rowSelection)
+     const nowSelectedRows = Object.keys(rowSelection).map(
+      (key) =>{
+        return table.getSelectedRowModel().rowsById[key]?.original || []
+        // console.log("여기")
+      }
     )
-    return prevSelectedRows;
-  }, [rowSelection, table]);
+    // console.log("prevSelectedRows",prevSelectedRows)
+     setSelMultipleRows(nowSelectedRows);
+  },[rowSelection,table])
 
 
   useImperativeHandle(ref, () => {
@@ -759,7 +778,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
         };
       },
       getSelectedMultipleRows: ()=>{
-        return getMultipleSelectRowsOrginal();
+        return selMultipleRows;
       },
       removeSelectedMultipleRows:()=>{
         setRowSelection({});
@@ -771,7 +790,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
       //   return table.getAllLeafColumns();
       // }
     }
-  }, [table,getMultipleSelectRowsOrginal]);
+  }, [table,selMultipleRows]);
 
 
   //drag and drop sensor 컬럼순서바꾸기
@@ -920,7 +939,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
 
     </DndContext>
   );
-});
+}));
 
 
 const GP_Header = ({
@@ -1129,6 +1148,7 @@ const GP_Cell = ({ cell, onClick }:
     </td>
   )
 }
+
 
 
 export default GPtable;
