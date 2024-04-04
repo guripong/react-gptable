@@ -307,7 +307,7 @@ $hover-color: rgb(70, 70, 70);
         // background:red;
         margin-right: 6px;
         height: 100%;
-        width: 6px;
+        width: calc(100% - 6px);
         // background:rgba(0,255,0,0.1);
         display: block;
         /* 블록태그로 만들어준다 */
@@ -318,7 +318,7 @@ $hover-color: rgb(70, 70, 70);
         /*height:50%; */
         background-position: right;
         background-repeat: no-repeat;
-        padding-right: 10px;
+        
 
         background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAQAAADYWf5HAAAAkElEQVQoz7X QMQ5AQBCF4dWQSJxC5wwax1Cq1e7BAdxD5SL+Tq/QCM1oNiJidwox0355mXnG/DrEtIQ6azioNZQxI0ykPhTQIwhCR+BmBYtlK7kLJYwWCcJA9M4qdrZrd8pPjZWPtOqdRQy320YSV17OatFC4euts6z39GYMKRPCTKY9UnPQ6P+GtMRfGtPnBCiqhAeJPmkqAAAAAElFTkSuQmCC");
 
@@ -370,7 +370,7 @@ $hover-color: rgb(70, 70, 70);
 
                     // line-height: 1.2rem;
                     .headerText {
-
+                        text-align: center;
                         width: 100%;
                         white-space: nowrap;
                         text-overflow: ellipsis;

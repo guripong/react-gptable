@@ -1,5 +1,5 @@
 import GPtable from "./GPtable";
-import { GPTableInstance, GPtableProps ,GPColumn} from "./GPTableTypes"; // GPprops를 정의한 파일로의 경로를 사용해야 합니다.
+import { GPTableInstance, GPtableProps ,GPColumn,GPtableOption} from "./GPTableTypes"; // GPprops를 정의한 파일로의 경로를 사용해야 합니다.
 import DebouncedInput from "./components/DebouncedInput/DebouncedInput";
 import IndeterminateCheckbox from "./components/IndeterminateCheckbox/IndeterminateCheckbox";
 
@@ -10,4 +10,4 @@ const isOdd = (n: number): boolean => {
 };
 
 export { GPtable, isOdd, DebouncedInput ,IndeterminateCheckbox  };
-export type { GPTableInstance, GPtableProps ,GPColumn};
+export type { GPTableInstance, GPtableProps ,GPColumn,GPtableOption};

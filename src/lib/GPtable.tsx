@@ -88,6 +88,7 @@ const GPtable = memo(forwardRef<GPTableInstance, GPtableProps<any>>((props, ref)
     onClickRow,
     onCheckRow,
     option: userOptions = undefined,
+    toolbar
   } = props;
 
   const [beforeload_column_initial] = useState<GPColumn2[]>(()=>{
@@ -103,11 +104,14 @@ const GPtable = memo(forwardRef<GPTableInstance, GPtableProps<any>>((props, ref)
   const [loading, set_loading] = useState<boolean>(false);
 
 
+
+  const toolbarRender = toolbar ||null;
+
   const {
     //툴바 옵션들
-    globalfilter, columnAttributeButton, toolbarRender, saveExcelButton,
+    globalfilter, columnAttributeButton, saveExcelButton, 
     //pagination 옵션들
-    usePagination, paginationArr, defaultPageSize,
+    paginationArr, defaultPageSize,usePagination,
     //column 옵션들
     enableResizingColumn, enableOrderingColumn,
     //row 옵션
@@ -133,7 +137,7 @@ const GPtable = memo(forwardRef<GPTableInstance, GPtableProps<any>>((props, ref)
         globalfilter: false,
         columnAttributeButton: false,
         saveExcelButton: false,
-        render: null,
+        // render: null,
       }
     };
 
@@ -144,7 +148,6 @@ const GPtable = memo(forwardRef<GPTableInstance, GPtableProps<any>>((props, ref)
 
     const globalfilter = option?.toolbar?.globalfilter;
     const columnAttributeButton = option?.toolbar?.columnAttributeButton;
-    const toolbarRender = option?.toolbar?.render;
     const saveExcelButton = option?.toolbar?.saveExcelButton;
 
     const usePagination = option?.pagination || null;
@@ -165,7 +168,6 @@ const GPtable = memo(forwardRef<GPTableInstance, GPtableProps<any>>((props, ref)
     return {
       globalfilter,
       columnAttributeButton,
-      toolbarRender,
       usePagination,
       paginationArr,
       defaultPageSize,
@@ -230,6 +232,8 @@ const GPtable = memo(forwardRef<GPTableInstance, GPtableProps<any>>((props, ref)
 
   }, [columnVisibility, columnFilters]);
 
+
+  //usePagination에 따라서 pagerows 갯수가 바뀜 
   useEffect(()=>{
     if(usePagination){
       setPagination(p=>{
@@ -241,6 +245,8 @@ const GPtable = memo(forwardRef<GPTableInstance, GPtableProps<any>>((props, ref)
     }
 
   },[columnFilters,usePagination])
+
+
 
 
   const icolumn = useMemo<GPColumn[]>(() => {
@@ -503,6 +509,8 @@ const GPtable = memo(forwardRef<GPTableInstance, GPtableProps<any>>((props, ref)
     // console.log("rememberSelRow",rememberSelRow)
     // console.log("multipleSelRowCheckbox",multipleSelRowCheckbox)
     // console.log("바뀐data", data)
+
+    // console.log("동작")
     function selectedRowsDone() {
       return new Promise(function (resolve) {
         setSelectedRow((prevSelectedOneRow) => {
@@ -534,6 +542,7 @@ const GPtable = memo(forwardRef<GPTableInstance, GPtableProps<any>>((props, ref)
         });
       });
     }
+
     selectedRowsDone().then((res_findkey) => {
       // console.log("res_findkey",res_findkey);
       setPagination(prev => {

@@ -1,8 +1,8 @@
 
-import React from 'react';
+import React, { useReducer } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GPtable, IndeterminateCheckbox } from './lib';
-import type { GPTableInstance, GPColumn } from './lib';
+import type { GPTableInstance, GPColumn, GPtableProps ,GPtableOption } from './lib';
 import "./App.scss"
 
 // import { GPtable } from 'react-gptable';
@@ -12,6 +12,7 @@ import "./App.scss"
 // ESM
 import { faker } from '@faker-js/faker';
 import { sample } from 'lodash';
+// import { GPtableOption } from './lib/GPTableTypes';
 
 type Person = {
   data_idx: number
@@ -32,7 +33,7 @@ type Person = {
 
 
 function App() {
-
+  const rerender = useReducer(() => ({}), {})[1];
   const [selRow,setSelRow] = useState(null);
   const column: GPColumn[] = useMemo(() => {
     let originArr: GPColumn[] = [
@@ -231,11 +232,48 @@ function App() {
   },[])
   
   // console.log("랜더")
+  const tableOption =useMemo <GPtableOption>(()=>{
+
+    return {
+
+      //saveTable:"asf", //잇을때만 저장
+      //저장할때는 width 순서 hide   // sort안하고
+      autoSavetableName: "oppa", //필터값 기억한다
+      //컬럼순서 
+      row: {
+        rememberSelRow: true, //default true //한줄선택 기억 pKey가 있다면
+        selRowColor: "#666",            
+        selRowBackground: "rgba(255,0,0,.1)", //1줄선택로우 배경색 default transparent         
+        hoverSelRowColor:"#fff",
+        hoverSelRowBackground:"red",
+        multipleSelRowCheckbox: true, //다중 선택row default false
+
+      },
+      column: {
+        resizing: true, //모든컬럼 리사이징 가능여부 default true
+        ordering: true, //모든컬럼 오더링 가능여부 default true
+      },
+      pagination: {
+        paginationArr: [1, 2, 3, 10, 50], //default 10,20,30,40
+        // defaultPageSize: 2,  //default = paginationArr[0]
+      },
+      toolbar: {
+        globalfilter: true,//default false
+        columnAttributeButton: true,// defaulte false,
+        saveExcelButton: true, //default false,            
+      }
+    }
+  },[refreshdata,setCustomFilter]);
+
+
 
   return (<div className="app" style={{ background: "#eee" }} >
     {/* {"isOdd사용후:" + isOdd(4)} */}
     <div>
       아래가 테이블 wrapper Size 에따른 크기
+      <button onClick={()=>{
+        rerender();
+      }}>리랜더</button>
     </div>
     <br />
     <div style={{ width: '800px', display: "flex", background: "#fff" }}>
@@ -258,49 +296,25 @@ function App() {
 
         //한줄고른거 안날라가고 pkey값이 있으면 해당 page로 이동한다
         //필터값 기억한다 default
+      
 
-
-        option={{
-          //saveTable:"asf", //잇을때만 저장
-          //저장할때는 width 순서 hide   // sort안하고
-          autoSavetableName: "oppa", //필터값 기억한다
-          //컬럼순서 
-          row: {
-            rememberSelRow: true, //default true //한줄선택 기억 pKey가 있다면
-            selRowColor: "#666",            
-            selRowBackground: "rgba(255,0,0,.1)", //1줄선택로우 배경색 default transparent         
-            multipleSelRowCheckbox: true, //다중 선택row default false
-          },
-          column: {
-            resizing: true, //모든컬럼 리사이징 가능여부 default true
-            ordering: true, //모든컬럼 오더링 가능여부 default true
-          },
-          pagination: {
-            paginationArr: [1, 2, 3, 10, 50], //default 10,20,30,40
-            // defaultPageSize: 2,  //default = paginationArr[0]
-          },
-          toolbar: {
-            globalfilter: true,//default false
-            columnAttributeButton: true,// defaulte false,
-            saveExcelButton: true, //default false,            
-            render: () => {
-              return (<>
-                <button className="btn" 
-                onClick={()=>{
-                  gptableRef?.current?.removeSelectedMultipleRows();
-                }}>제거 checkmultipleRows</button>
-                <button className="btn" onClick={()=>{
-                  let rows=gptableRef?.current?.getSelectedMultipleRows();
-                  console.log("rows",rows);
-                }}>선택checkRows 조회</button>
-                <button className="btn btn-green" onClick={refreshdata}>새로고침</button>
-                <button className="btn btn-red" onClick={setCustomFilter}>나이 max5 필터 걸기</button>
-                {/* <button className="btn btn-orange" disabled={true}>테이블저장</button> */}
-              </>)
-            }
-          }
+        option={tableOption}
+        toolbar={() => {
+          return (<>
+            <button className="btn" 
+            disabled={selRow?true:false}
+            onClick={()=>{
+              gptableRef?.current?.removeSelectedMultipleRows();
+            }}>제거 checkmultipleRows</button>
+            <button className="btn" onClick={()=>{
+              let rows=gptableRef?.current?.getSelectedMultipleRows();
+              console.log("rows",rows);
+            }}>선택checkRows 조회</button>
+            <button className="btn btn-green" onClick={refreshdata}>새로고침</button>
+            <button className="btn btn-red" onClick={setCustomFilter}>나이 max5 필터 걸기</button>
+            {/* <button className="btn btn-orange" disabled={true}>테이블저장</button> */}
+          </>)
         }}
-
 
       />
     </div>

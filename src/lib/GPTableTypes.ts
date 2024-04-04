@@ -214,6 +214,51 @@ interface GPColumn2 {
 
 }
 
+
+/**
+*   - row: 행 관련 옵션 설정입니다.
+*       - selRowBackground: 선택된 행의 배경색입니다. (기본값: '#fff')
+*       - multipleSelRowCheckbox: 다중 선택 행의 체크박스 사용 여부입니다. (기본값: false)
+*   - column: 컬럼 관련 옵션 설정입니다.
+*       - resizing: 컬럼 크기 조절 기능을 사용할지 여부입니다. (기본값: true)
+*       - ordering: 컬럼 순서 변경 기능을 사용할지 여부입니다. (기본값: true)
+*   - pagination: 페이징 옵션을 설정합니다.
+*       - paginationArr: 페이지 번호 배열입니다.
+*       - defaultPageSize: 기본 페이지 크기입니다.
+*   - toolbar: 툴바 옵션 설정입니다.
+*       - globalfilter: 전역 필터 기능을 사용할지 여부입니다.
+*       - defaultToolbar: 기본 툴바를 사용할지 여부입니다.
+*       - columnAttributeButton: 컬럼 속성 버튼을 표시할지 여부입니다.
+
+**/
+interface GPtableOption {
+    autoSavetableName?: string;
+    row?: {
+        selRowColor?: string;
+        selRowBackground?: string;
+        multipleSelRowCheckbox?: boolean;
+        rememberSelRow?: boolean;
+        hoverSelRowColor?: string;
+        hoverSelRowBackground?: string;
+    }
+    column?: {
+        resizing?: boolean;
+        ordering?: boolean;
+    }
+    /**
+      아무것도 안넣으면 pagination false.. default
+    **/
+    pagination?: {
+        paginationArr?: Array<number>;
+        defaultPageSize?: number;
+    }
+    toolbar?: {
+        globalfilter?: boolean;
+        columnAttributeButton?: boolean;
+        saveExcelButton?: boolean;
+    }
+}
+
 interface GPtableProps<T> {
     className?: string;
     /**
@@ -244,32 +289,9 @@ interface GPtableProps<T> {
     *       - columnAttributeButton: 컬럼 속성 버튼을 표시할지 여부입니다.
     *       - render: 툴바를 렌더링하는 함수입니다.
     **/
-    option?: {
-        autoSavetableName?:string;
-        row?:{
-            selRowColor?:string;
-            selRowBackground?:string;
-            multipleSelRowCheckbox?:boolean;
-            rememberSelRow?:boolean;
-        }
-        column?:{
-            resizing?:boolean;
-            ordering?:boolean;
-        }
-        /**
-          아무것도 안넣으면 pagination false.. default
-        **/
-        pagination?:{
-            paginationArr?: Array<number>;
-            defaultPageSize?:number;
-        }
-        toolbar?:{
-            globalfilter?: boolean;
-            columnAttributeButton?: boolean;
-            saveExcelButton?: boolean;
-            render?: () => JSX.Element;
-        }
-    }
+    option?: GPtableOption
+
+    toolbar?: () => JSX.Element;
 }// 컬럼의 타입 정의
 
 
@@ -277,4 +299,4 @@ interface GPtableProps<T> {
 declare const GPtable: ForwardRefExoticComponent<GPtableProps<any>>;
 
 export { GPtable };
-export type { GPTableInstance, GPtableProps ,GPColumn2,GPColumn  };
+export type { GPTableInstance, GPtableProps ,GPColumn2,GPColumn  ,GPtableOption};
