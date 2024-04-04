@@ -65,7 +65,11 @@ interface GPColumn {
      * 컬럼에 사용될 데이터의 키(key)입니다.
      */
     accessorKey: string;
-
+      /**
+     * 컬럼에 사용될 데이터의 키(key)입니다. accessorKey를 다치기힘들면 이것만치세요
+     */
+    accessor?: string;
+    
     /**
      * 컬럼의 순서 변경 기능을 사용할지 여부를 나타냅니다.
      */

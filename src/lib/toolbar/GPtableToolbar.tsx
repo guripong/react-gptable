@@ -110,7 +110,7 @@ const GPtableToolbar: React.FC<GPtableToolbarProps> = (props) => {
         const allColumns = table.getAllLeafColumns();
         const csvRows = [];
         let headerRow = [];
-        console.log(allColumns);
+        // console.log("allColumns",allColumns);
 
         for (let i = 0; i < allColumns.length; i++) {
             const columnDef: any = allColumns[i].columnDef;
@@ -131,8 +131,8 @@ const GPtableToolbar: React.FC<GPtableToolbarProps> = (props) => {
         }
         csvRows.push(headerRow);
 
-        console.log("csvRows",csvRows);
-        console.log("rows",rows)
+        // console.log("csvRows",csvRows);
+        // console.log("rows",rows)
         for(let i = 0 ; i<rows.length; i++){
             const oneRow = [];
             for(let j = 0 ; j < allColumns.length; j++){
@@ -140,8 +140,10 @@ const GPtableToolbar: React.FC<GPtableToolbarProps> = (props) => {
                 if (columnDef.accessorKey === "multipleSelRowCheckbox") {
                     continue;
                 }
+
                 if (option === 'visible') {
-                    if (allColumns[i].getIsVisible() === true) {
+
+                    if (allColumns[j].getIsVisible() === true) {
                         oneRow.push(escapeDataIfNeeded(rows[i][columnDef.accessorKey]??''));
                     }
                 }
@@ -151,11 +153,13 @@ const GPtableToolbar: React.FC<GPtableToolbarProps> = (props) => {
             }
             csvRows.push(oneRow);
         }
-        console.log("csvRows",csvRows);
+        // console.log("csvRows",csvRows);
+
+
         var BOM = "\uFEFF";
         let csvdata = BOM + csvRows.map(e => e.join(",")).join("\n");
         const csvData = new Blob([csvdata], { type: 'text/csv;charset=utf-8;' });
-        console.log("csvData",csvData)
+        // console.log("csvData",csvData)
         
         // CSV 파일 다운로드
         const link = document.createElement('a');

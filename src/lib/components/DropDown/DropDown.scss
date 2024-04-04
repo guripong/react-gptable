@@ -1,15 +1,13 @@
 .dropDown{
 
     box-sizing: border-box;
-    // outline:1px solid red;
+
     display:flex;
     justify-content: center;
     align-items: center;
     position:relative;
-    // z-index: 10000;
     .dropDownWrap{
-        z-index:1001;
-        // outline: 1px solid green;
+        z-index:1;
         position:absolute;
         right:0;
         top:45px;

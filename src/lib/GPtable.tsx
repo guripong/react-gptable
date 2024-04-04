@@ -317,6 +317,9 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
         setSorting(oneColumn.sorting);
       }
 
+      if(!oneColumn.accessorKey&&oneColumn.accessor){
+        oneColumn.accessorKey = oneColumn.accessor;
+      }
 
       if (oneColumn.Header) {
         obj.header = (() => oneColumn.Header);
