@@ -39,7 +39,7 @@ function App() {
       {
         pKey: true,
         Header: "pKeyidx",
-        accessorKey: "data_idx", //key name
+        accessor: "data_idx", //key name
         useSort: false, // default true
         // useFilter: true, // default false
 
@@ -50,7 +50,7 @@ function App() {
       },
       {
         Header: "가능.assggasg",
-        accessorKey: "data_idx2", //key name
+        accessor: "data_idx2", //key name
         width: 100,
         // defaultSort:"desc",
         cell: (info: any) => {
@@ -70,8 +70,8 @@ function App() {
         enableHiding: false,// 디폴트true 
         enableResizing: true,// default true
 
-        // Header: "성", // 표시될 글자 안넣으면 accessorKey name으로 표시
-        accessorKey: "firstName", //key name
+        // Header: "성", // 표시될 글자 안넣으면 accessor name으로 표시
+        accessor: "firstName", //key name
         // minWidth:44, //최소 컬럼넓이
         width: 150,
         accessorFn: (row: any) => {
@@ -90,14 +90,14 @@ function App() {
       },
       {
         Header: "이름",
-        accessorKey: "lastName",
+        accessor: "lastName",
         useFilter: false,
         show: false,//default true  
       },
       // {
       //   useSort: false,
       //   width: 150,
-      //   accessorKey: "mycheckbox2",
+      //   accessor: "mycheckbox2",
       //   Header: "어떤값",
       //   header: ({ table }: any) => {
       //     return <>체크시 실제값이 바뀜 custom rendering</>
@@ -125,7 +125,7 @@ function App() {
       {
         width: 300,
         Header: "나이",
-        accessorKey: "age",
+        accessor: "age",
         useFilter: true,
         // filterValue:[undefined,"0"],
         cell: (info: any) => {

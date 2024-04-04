@@ -66,7 +66,7 @@ interface GPColumn {
     /**
      * 컬럼에 사용될 데이터의 키(key)입니다.
      */
-    accessorKey: string;
+    accessorKey?: string;
       /**
      * 컬럼에 사용될 데이터의 키(key)입니다. accessorKey를 다치기힘들면 이것만치세요
      */
@@ -130,7 +130,89 @@ interface GPColumn {
     cell?: (info: any) => JSX.Element;
 
 }
+interface GPColumn2 {
+    /** 
+     *  selection 의 기준이 되는키 기억합니다
+     * **/
+    pKey?: boolean;
+    /**
+     * 컬럼 헤더에 표시할 텍스트입니다.
+     * 생략 시 accessorKey가 대체됩니다.
+     */
+    Header?: string;
 
+    /**
+     * 컬럼 헤더를 커스터마이징하는 함수입니다.
+     * 컬럼 헤더를 사용자 정의 JSX 요소로 렌더링할 수 있습니다.
+     */
+    header?: (info: any) => JSX.Element;
+
+    /**
+     * 컬럼에 사용될 데이터의 키(key)입니다.
+     */
+    accessorKey: string;
+      /**
+     * 컬럼에 사용될 데이터의 키(key)입니다. accessorKey를 다치기힘들면 이것만치세요
+     */
+
+    /**
+     * 컬럼의 순서 변경 기능을 사용할지 여부를 나타냅니다.
+     */
+    enableOrdering?: boolean;
+
+    /**
+     * 컬럼의 크기를 조정할 수 있는지 여부를 나타냅니다.
+     * 기본값은 true입니다.
+     */
+    enableResizing?: boolean;
+
+    /**
+     * 컬럼을 숨길 수 있는지 여부를 나타냅니다.
+     * 기본값은 true입니다.
+     */
+    enableHiding?: boolean;
+
+    /**
+     * 컬럼의 정렬 기능 사용 여부를 나타냅니다.
+     * 기본값은 true입니다.
+     */
+    useSort?: boolean;
+
+    /**
+     * 컬럼의 필터 기능 사용 여부를 나타냅니다.
+     * 기본값은 true입니다.
+     */
+    useFilter?: boolean;
+
+    /**
+     * 컬럼어 default filter value입니다
+     * number value의 경우 min max
+     * **/
+    filterValue?: string | any[];
+    
+    /**
+     * 컬럼의 표시 여부를 나타냅니다.
+     * 기본값은 true입니다.
+     */
+    show?: boolean;
+
+    /**
+     * 컬럼의 너비입니다.
+     */
+    width?: number;
+
+    /**
+     * 데이터를 변환하는 함수입니다.
+     * 특정 형식으로 데이터를 가공할 수 있습니다.
+     */
+    accessorFn?: (row: any) => any;
+
+    /**
+     * 컬럼 셀에 표시할 사용자 정의 컴포넌트입니다.
+     */
+    cell?: (info: any) => JSX.Element;
+
+}
 
 interface GPtableProps<T> {
     className?: string;
@@ -195,4 +277,4 @@ interface GPtableProps<T> {
 declare const GPtable: ForwardRefExoticComponent<GPtableProps<any>>;
 
 export { GPtable };
-export type { GPTableInstance, GPtableProps ,GPColumn };
+export type { GPTableInstance, GPtableProps ,GPColumn2,GPColumn  };

@@ -1,5 +1,5 @@
 import React, { CSSProperties, forwardRef, memo, useCallback, useEffect, useImperativeHandle, useMemo, useReducer, useRef, useState } from 'react';
-import type { GPColumn, GPTableInstance, GPtableProps } from './GPTableTypes';
+import type { GPColumn, GPColumn2, GPTableInstance, GPtableProps } from './GPTableTypes';
 import {
   Column,
   Table,
@@ -90,7 +90,15 @@ const GPtable = memo(forwardRef<GPTableInstance, GPtableProps<any>>((props, ref)
     option: userOptions = undefined,
   } = props;
 
-  const [beforeload_column_initial] = useState<GPColumn[]>(JSON.parse(JSON.stringify(beforeload_column)));
+  const [beforeload_column_initial] = useState<GPColumn2[]>(()=>{
+    const copy=JSON.parse(JSON.stringify(beforeload_column));
+   for(let i = 0 ; i <copy.length; i++){
+    if(!copy[i].accessorKey&&copy[i].accessor){
+      copy[i].accessorKey=copy[i].accessor;
+    }
+   }
+    return copy;
+  });
   const rerender = useReducer(() => ({}), {})[1];
   const [loading, set_loading] = useState<boolean>(false);
 
@@ -237,6 +245,12 @@ const GPtable = memo(forwardRef<GPTableInstance, GPtableProps<any>>((props, ref)
 
   const icolumn = useMemo<GPColumn[]>(() => {
     let newLoadedColumn: GPColumn[] = beforeload_column;
+    for(let i = 0 ; i <newLoadedColumn.length; i++){
+      if(!newLoadedColumn[i].accessorKey&&newLoadedColumn[i].accessor){
+        const a:any = newLoadedColumn[i].accessor;
+        newLoadedColumn[i].accessorKey=a;
+      }
+     }
 
     if (autoSavetableName) {
       try {
@@ -260,7 +274,7 @@ const GPtable = memo(forwardRef<GPTableInstance, GPtableProps<any>>((props, ref)
   const pKey = useMemo(() => {
     for (let i = 0; i < icolumn.length; i++) {
       if (icolumn[i].pKey) {
-        return icolumn[i].accessorKey;
+        return icolumn[i]?.accessorKey ||icolumn[i].accessor;
       }
     }
     return null;
@@ -325,9 +339,7 @@ const GPtable = memo(forwardRef<GPTableInstance, GPtableProps<any>>((props, ref)
         setSorting(oneColumn.sorting);
       }
 
-      if(!oneColumn.accessorKey&&oneColumn.accessor){
-        oneColumn.accessorKey = oneColumn.accessor;
-      }
+  
 
       if (oneColumn.Header) {
         obj.header = (() => oneColumn.Header);
@@ -396,11 +408,11 @@ const GPtable = memo(forwardRef<GPTableInstance, GPtableProps<any>>((props, ref)
   }, [icolumn, multipleSelRowCheckbox])
 
   const initColumnFilter = useMemo<ColumnFiltersState>(() => {
-    let filterArr = [];
+    let filterArr:ColumnFiltersState = [];
     for (let i = 0; i < icolumn.length; i++) {
       if (icolumn[i].filterValue) {
         filterArr.push({
-          id: icolumn[i].accessorKey,
+          id: icolumn[i].accessorKey || '',
           value: icolumn[i].filterValue
         })
       }
@@ -597,7 +609,9 @@ const GPtable = memo(forwardRef<GPTableInstance, GPtableProps<any>>((props, ref)
     let obj: any = {
     };
     for (let i = 0; i < beforeload_column_initial.length; i++) {
-      const oneColumn: GPColumn = beforeload_column_initial[i];
+      const oneColumn: GPColumn2 = beforeload_column_initial[i];
+
+    
       // console.log("oneColumn",oneColumn)
       if (oneColumn.show === false) {
         obj[oneColumn.accessorKey] = false;
@@ -618,7 +632,8 @@ const GPtable = memo(forwardRef<GPTableInstance, GPtableProps<any>>((props, ref)
     obj = {
     };
     for (let i = 0; i < beforeload_column_initial.length; i++) {
-      const oneColumn: GPColumn = beforeload_column_initial[i];
+      const oneColumn: GPColumn2 = beforeload_column_initial[i];
+    
       // console.log("oneColumn",oneColumn)
       if (oneColumn.width) {
         obj[oneColumn.accessorKey] = oneColumn.width;
@@ -958,6 +973,7 @@ const GP_Header = ({
       useSortable({ id: header.column.id }) :
       { attributes: {}, isDragging: false, listeners: {}, setNodeRef: () => { }, transform: { x: 0, y: 0, scaleX: 1, scaleY: 1 } };
   const columnSize = header.column.getSize();
+
   const style: CSSProperties = {
     opacity: isDragging ? 0.8 : 1,
     position: 'relative',
@@ -968,19 +984,9 @@ const GP_Header = ({
     zIndex: isDragging ? 1 : 0,
   };
 
-  // useEffect(()=>{
-  //   const key = columnDef.accessorKey;
-  //   console.log(`${key}:`,columnSize)
-
-  // },[columnDef,columnSize])
 
 
 
-  // console.log("columnSizeVars",columnSizeVars)
-  //
-  //enableOrderingColumn 일때만
-  //attributes  listeners 할당
-  // const a = header.getContext();
   const headerString = useMemo(() => {
     const columnDef: any = header.column.columnDef;
     // console.log("columnDef 거시기")
@@ -988,7 +994,7 @@ const GP_Header = ({
       return columnDef.Header;
     }
     else {
-      return columnDef.accessorKey;
+      return columnDef.accessorKey ||  columnDef.accessor;
     }
   }, [header.column.columnDef])
 
