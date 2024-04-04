@@ -272,7 +272,7 @@ function App() {
           //컬럼순서 
           row: {
             rememberSelRow: true, //default true //한줄선택 기억 pKey가 있다면
-            selRowColor: "#666",
+            selRowColor: "#666",            
             selRowBackground: "rgba(255,0,0,.1)", //1줄선택로우 배경색 default transparent         
             multipleSelRowCheckbox: true, //다중 선택row default false
           },
@@ -290,6 +290,14 @@ function App() {
             saveExcelButton: true, //default false,            
             render: () => {
               return (<>
+                <button className="btn" onClick={()=>{
+                  
+                  gptableRef?.current?.removeSelectedMultipleRows();
+                }}>제거 checkmultipleRows</button>
+                <button className="btn" onClick={()=>{
+                  let rows=gptableRef?.current?.getSelectedMultipleRows();
+                  console.log("rows",rows);
+                }}>선택checkRows 조회</button>
                 <button className="btn btn-green" onClick={refreshdata}>새로고침</button>
                 <button className="btn btn-red" onClick={setCustomFilter}>나이 max5 필터 걸기</button>
                 {/* <button className="btn btn-orange" disabled={true}>테이블저장</button> */}

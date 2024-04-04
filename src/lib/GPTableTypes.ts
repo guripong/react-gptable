@@ -24,6 +24,8 @@ interface GPTableInstance {
     get_columnOrder?: () => any;
 
     set_customFilter : (id:string,filter:string|[string,string]) =>GPInstanceResponse;
+    getSelectedMultipleRows : ()=>any[];
+    removeSelectedMultipleRows : ()=>void;
 }
 
 

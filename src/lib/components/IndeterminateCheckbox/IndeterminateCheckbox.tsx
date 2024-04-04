@@ -2,17 +2,7 @@ import styled from 'styled-components';
 import { HTMLProps, useEffect, useRef } from 'react';
 
 // 스타일드 컴포넌트 정의
-const CheckboxInput = styled.input`
-  /* 체크박스의 크기 조정 */
-  width: 24px;
-  height: 24px;
-  cursor: pointer; /* 마우스 커서를 포인터로 변경 */
-`;
 
-// 인풋 태그를 감싸는 래퍼 스타일드 컴포넌트 정의
-const CheckboxWrapper = styled.div`
-  /* 추가 스타일을 적용할 부분 */
-`;
 
 // 인더터미네이트 체크박스 컴포넌트
 function IndeterminateCheckbox({
@@ -29,9 +19,11 @@ function IndeterminateCheckbox({
   }, [ref, indeterminate, rest.checked]);
 
   return (
-    <CheckboxWrapper className={className}>
-      <CheckboxInput type="checkbox" ref={ref} {...rest} />
-    </CheckboxWrapper>
+    <div className={className} >
+      <input type="checkbox" ref={ref} {...rest} 
+        style={{width:24,height:24,cursor:"pointer"}}
+      />
+    </div>
   );
 }
 

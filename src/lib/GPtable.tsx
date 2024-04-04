@@ -277,7 +277,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
         accessorKey: "multipleSelRowCheckbox",
         header: ({ table }: any) => {
 
-          return (<div style={{ width: "100%", display: "flex", justifyContent: "center", alignContent: "center" }}>
+          return (
             <IndeterminateCheckbox
               {...{
                 checked: table.getIsAllRowsSelected(),
@@ -285,12 +285,11 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
                 onChange: table.getToggleAllRowsSelectedHandler(),
               }}
             />
-          </div>
           )
         },
         cell: ({ row }: any) => {
 
-          return (<div style={{ width: "100%", display: "flex", justifyContent: "center", alignContent: "center" }}>
+          return (
             <IndeterminateCheckbox
               {...{
                 checked: row.getIsSelected(),
@@ -298,7 +297,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
                 indeterminate: row.getIsSomeSelected(),
                 onChange: row.getToggleSelectedHandler(),
               }}
-            /></div>
+            />
           )
         },
       })
@@ -758,9 +757,13 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
           valid: true,
           msg: "성공"
         };
+      },
+      getSelectedMultipleRows: ()=>{
+        return getMultipleSelectRowsOrginal();
+      },
+      removeSelectedMultipleRows:()=>{
+        setRowSelection({});
       }
-
-
       // set_columnOrder: (newOrder) => {
       //   table.setColumnOrder(newOrder);
       // },
@@ -768,7 +771,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
       //   return table.getAllLeafColumns();
       // }
     }
-  }, [table]);
+  }, [table,getMultipleSelectRowsOrginal]);
 
 
   //drag and drop sensor 컬럼순서바꾸기
@@ -876,7 +879,16 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
                           <GP_Cell key={cell.id} cell={cell}
 
                             onClick={(e) => {
-                              setSelectedRow(row.original);
+                              setSelectedRow((origin)=>{
+                                
+                                if(row.original===origin){
+
+                                  return null;
+                                }
+                                else{
+                                  return row.original;
+                                }
+                              });
                               if (onClickRow) {
                                 onClickRow(e, row.original, cell);
                               }
@@ -1092,7 +1104,7 @@ const GP_Cell = ({ cell, onClick }:
     <td style={style}
       ref={setNodeRef}
 
-      onClick={onClick}
+      onClick={isMultipleCheckBox?()=>{}:onClick}
 
     >
       <div className="cell"
