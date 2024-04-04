@@ -73,7 +73,7 @@ import CommonFilter from './filters/CommonFilter';
     * @param option 테이블에 대한 옵션 설정
     * @see {@link GPtableProps}
 */
-const GPtable = memo(forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
+const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
   const { className,
     column: beforeload_column = [{
       Header: "column1",
@@ -106,6 +106,8 @@ const GPtable = memo(forwardRef<GPTableInstance, GPtableProps<any>>((props, ref)
 
 
   const toolbarRender = toolbar ||null;
+
+
 
   const {
     //툴바 옵션들
@@ -182,7 +184,7 @@ const GPtable = memo(forwardRef<GPTableInstance, GPtableProps<any>>((props, ref)
     };
   }, [userOptions]);
 
-
+  console.log("enableOrderingColumn",enableOrderingColumn)
   const gpTableWrapRef = useRef<HTMLDivElement>(null);
 
 
@@ -818,6 +820,21 @@ const GPtable = memo(forwardRef<GPTableInstance, GPtableProps<any>>((props, ref)
 
 
   //drag and drop sensor 컬럼순서바꾸기
+
+
+
+  // reorder columns after drag & drop
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    // console.log("Asfasf")
+    if (active && over && active.id !== over.id) {
+      setColumnOrder(columnOrder => {
+        const oldIndex = columnOrder.indexOf(active.id as string)
+        const newIndex = columnOrder.indexOf(over.id as string)
+        return arrayMove(columnOrder, oldIndex, newIndex) //this is just a splice util
+      })
+    }
+  }
   const sensors = useSensors(
     useSensor(MouseSensor, {
       onActivation: (event) => {
@@ -828,20 +845,6 @@ const GPtable = memo(forwardRef<GPTableInstance, GPtableProps<any>>((props, ref)
     useSensor(TouchSensor, {}),
     useSensor(KeyboardSensor, {})
   )
-
-
-  // reorder columns after drag & drop
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event
-    if (active && over && active.id !== over.id) {
-      setColumnOrder(columnOrder => {
-        const oldIndex = columnOrder.indexOf(active.id as string)
-        const newIndex = columnOrder.indexOf(over.id as string)
-        return arrayMove(columnOrder, oldIndex, newIndex) //this is just a splice util
-      })
-    }
-  }
-
   // console.log("columns.length",columns.length)
   // console.log("pagination",pagination);
   // console.log("랜더")
@@ -963,7 +966,7 @@ const GPtable = memo(forwardRef<GPTableInstance, GPtableProps<any>>((props, ref)
 
     </DndContext>
   );
-}));
+});
 
 
 const GP_Header = ({
@@ -975,9 +978,13 @@ const GP_Header = ({
   enableOrderingColumn: boolean;
 }) => {
   const columnDef: any = header.column.columnDef;
+  // console.log("enableOrderingColumn",enableOrderingColumn)
   // const { attributes, isDragging, listeners, setNodeRef, transform } =  useSortable({ id: header.column.id, });
   // enableOrderingColumn이 true이고, enableOrdering이 true인 경우에만 useSortable 사용
+
+
   const { attributes, isDragging, listeners, setNodeRef, transform } =
+
     enableOrderingColumn && columnDef.enableOrdering !== false ?
       useSortable({ id: header.column.id }) :
       { attributes: {}, isDragging: false, listeners: {}, setNodeRef: () => { }, transform: { x: 0, y: 0, scaleX: 1, scaleY: 1 } };
@@ -1031,8 +1038,11 @@ const GP_Header = ({
                 ? () => { }
                 : header.column.getToggleSortingHandler()
             }
-            {...(enableOrderingColumn && columnDef.enableOrdering !== false ? { ...attributes, ...listeners } : {})}
-
+            {...(enableOrderingColumn && columnDef.enableOrdering !== false ?
+               { ...attributes, ...listeners } 
+               : {}
+            
+            )}
 
           >
             <span title={headerString}>{flexRender(header.column.columnDef.header, header.getContext())}</span>
@@ -1048,6 +1058,13 @@ const GP_Header = ({
                 ? () => { }
                 : header.column.getToggleSortingHandler()
             }
+            {...(enableOrderingColumn && columnDef.enableOrdering !== false ?
+              { ...attributes, ...listeners } 
+              : {}
+           
+           )}
+
+            
           />
 
 

@@ -46,7 +46,7 @@ const GPtableToolbar: React.FC<GPtableToolbarProps> = (props) => {
             // console.log(allColumns.find(d=>d.id===newOrder[targetIndex - 1]));
 
             const columndDef: any = allColumns.find(d => d.id === newOrder[targetIndex - 1])?.columnDef;
-            console.log("columndDef.enableOrdering", columndDef.enableOrdering)
+            // console.log("columndDef.enableOrdering", columndDef.enableOrdering)
             if (columndDef.enableOrdering === false) {
                 return;
             }
