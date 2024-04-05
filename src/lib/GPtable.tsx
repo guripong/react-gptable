@@ -290,6 +290,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     if (autoSavetableName) {
       try {
         const { columns, pageSize: loadPageSize } = loadTable(beforeload_column, autoSavetableName);
+        // console.log("columns",columns)
         newLoadedColumn = columns;
         setPagination((prev: any) => {
           return {

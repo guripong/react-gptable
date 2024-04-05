@@ -10,6 +10,12 @@ export function loadTable(originArr: GPColumn[],name:string): LoadTableResult {
   if (load) {
     load = JSON.parse(load);
   }
+  else{
+    return {
+      columns:originArr,
+      pageSize:null
+    }
+  }
   const load_columns = load.columns;
   const pageSize = load.pageSize || null;
 
