@@ -64,21 +64,21 @@ import Pagination from './pagination/Pagination';
 import CommonFilter from './filters/CommonFilter';
 import styled from 'styled-components';
 interface TableRowProps {
-  isSelected: boolean;
-  selRowBackground?: string;
-  selRowColor?: string;
-  hoverColor?: string;
-  hoverBackground?: string;
+  isselected: number;
+  selrowbackground?: string;
+  selrowcolor?: string;
+  hovercolor?: string;
+  hoverbackground?: string;
 }
 
 const StyledTableRow = styled.tr<TableRowProps>`
-  background-color: ${props => props.isSelected ? props.selRowBackground : 'inherit'};
-  color: ${props => props.isSelected ? props.selRowColor : 'inherit'};
+  background-color: ${props => props.isselected ? props.selrowbackground : 'inherit'};
+  color: ${props => props.isselected ? props.selrowcolor : 'inherit'};
   // 다른 스타일 속성들
 
   &:hover {
-    background-color: ${props => props.hoverBackground};
-    color :${props => props.hoverColor};
+    background-color: ${props => props.hoverbackground};
+    color :${props => props.hovercolor};
     // 다른 hover 스타일 속성들
   }
 `;
@@ -110,13 +110,13 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     toolbar
   } = props;
 
-  const [beforeload_column_initial] = useState<GPColumn2[]>(()=>{
-    const copy=JSON.parse(JSON.stringify(beforeload_column));
-   for(let i = 0 ; i <copy.length; i++){
-    if(!copy[i].accessorKey&&copy[i].accessor){
-      copy[i].accessorKey=copy[i].accessor;
+  const [beforeload_column_initial] = useState<GPColumn2[]>(() => {
+    const copy = JSON.parse(JSON.stringify(beforeload_column));
+    for (let i = 0; i < copy.length; i++) {
+      if (!copy[i].accessorKey && copy[i].accessor) {
+        copy[i].accessorKey = copy[i].accessor;
+      }
     }
-   }
     return copy;
   });
   const rerender = useReducer(() => ({}), {})[1];
@@ -124,20 +124,20 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
 
 
 
-  const toolbarRender = toolbar ||null;
+  const toolbarRender = toolbar || null;
 
 
 
   const {
     //툴바 옵션들
-    globalfilter, columnAttributeButton, saveExcelButton, 
+    globalfilter, columnAttributeButton, saveExcelButton,
     //pagination 옵션들
-    paginationArr, defaultPageSize,usePagination,
+    paginationArr, defaultPageSize, usePagination,
     //column 옵션들
     enableResizingColumn, enableOrderingColumn,
     //row 옵션
     rememberSelRow, selRowBackground, selRowColor, multipleSelRowCheckbox,
-    hoverRowBackground,hoverRowColor,
+    hoverRowBackground, hoverRowColor,
     //테이블 자동저장옵션
     autoSavetableName
   } = useMemo(() => {
@@ -149,8 +149,8 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
         selRowColor: "#000",
         selRowBackground: "#fff",
         multipleSelRowCheckbox: false,
-        hoverRowColor:"#000",
-        hoverRowBackground:"#fff",
+        hoverRowColor: "#000",
+        hoverRowBackground: "#fff",
       },
       column: {
         resizing: true,
@@ -237,14 +237,14 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
 
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [selectedRow, setSelectedRow] = useState(null); //한줄
-  const [selMultipleRows,setSelMultipleRows] = useState<any[]>([]);
+  const [selMultipleRows, setSelMultipleRows] = useState<any[]>([]);
 
-  useEffect(()=>{
-    if(onCheckRow){
+  useEffect(() => {
+    if (onCheckRow) {
       // console.log("selMultipleRows",selMultipleRows)
       onCheckRow(selMultipleRows);
     }
-  },[selMultipleRows,onCheckRow])
+  }, [selMultipleRows, onCheckRow])
 
 
   //컬럼의 visibility 가 보이다가 안보일때 필터도 제거하는부분
@@ -263,29 +263,29 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
 
 
   //usePagination에 따라서 pagerows 갯수가 바뀜 
-  useEffect(()=>{
-    if(usePagination){
-      setPagination(p=>{
+  useEffect(() => {
+    if (usePagination) {
+      setPagination(p => {
         return {
           ...p,
-          pageIndex:0
+          pageIndex: 0
         }
       })
     }
 
-  },[columnFilters,usePagination])
+  }, [columnFilters, usePagination])
 
 
 
 
   const icolumn = useMemo<GPColumn[]>(() => {
     let newLoadedColumn: GPColumn[] = beforeload_column;
-    for(let i = 0 ; i <newLoadedColumn.length; i++){
-      if(!newLoadedColumn[i].accessorKey&&newLoadedColumn[i].accessor){
-        const a:any = newLoadedColumn[i].accessor;
-        newLoadedColumn[i].accessorKey=a;
+    for (let i = 0; i < newLoadedColumn.length; i++) {
+      if (!newLoadedColumn[i].accessorKey && newLoadedColumn[i].accessor) {
+        const a: any = newLoadedColumn[i].accessor;
+        newLoadedColumn[i].accessorKey = a;
       }
-     }
+    }
 
     if (autoSavetableName) {
       try {
@@ -309,7 +309,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
   const pKey = useMemo(() => {
     for (let i = 0; i < icolumn.length; i++) {
       if (icolumn[i].pKey) {
-        return icolumn[i]?.accessorKey ||icolumn[i].accessor;
+        return icolumn[i]?.accessorKey || icolumn[i].accessor;
       }
     }
     return null;
@@ -374,7 +374,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
         setSorting(oneColumn.sorting);
       }
 
-  
+
 
       if (oneColumn.Header) {
         obj.header = (() => oneColumn.Header);
@@ -443,7 +443,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
   }, [icolumn, multipleSelRowCheckbox])
 
   const initColumnFilter = useMemo<ColumnFiltersState>(() => {
-    let filterArr:ColumnFiltersState = [];
+    let filterArr: ColumnFiltersState = [];
     for (let i = 0; i < icolumn.length; i++) {
       if (icolumn[i].filterValue) {
         filterArr.push({
@@ -627,13 +627,13 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     pKey, table])
 
 
-    //데이터바뀔시 체크박스 해제
+  //데이터바뀔시 체크박스 해제
   useEffect(() => {
     if (multipleSelRowCheckbox) {
       // console.log("비워")
       setRowSelection({});
     }
-  }, [multipleSelRowCheckbox,data])
+  }, [multipleSelRowCheckbox, data])
 
 
 
@@ -649,7 +649,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     for (let i = 0; i < beforeload_column_initial.length; i++) {
       const oneColumn: GPColumn2 = beforeload_column_initial[i];
 
-    
+
       // console.log("oneColumn",oneColumn)
       if (oneColumn.show === false) {
         obj[oneColumn.accessorKey] = false;
@@ -671,7 +671,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     };
     for (let i = 0; i < beforeload_column_initial.length; i++) {
       const oneColumn: GPColumn2 = beforeload_column_initial[i];
-    
+
       // console.log("oneColumn",oneColumn)
       if (oneColumn.width) {
         obj[oneColumn.accessorKey] = oneColumn.width;
@@ -752,17 +752,17 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
   }, [debouncedSave, columnOrder, columnVisibility, columnSizing, sorting, columnFilters, pagination]);
 
 
-  useEffect(()=>{
+  useEffect(() => {
     //  console.log("rowSelection",rowSelection)
-     const nowSelectedRows = Object.keys(rowSelection).map(
-      (key) =>{
+    const nowSelectedRows = Object.keys(rowSelection).map(
+      (key) => {
         return table.getSelectedRowModel().rowsById[key]?.original || []
         // console.log("여기")
       }
     )
     // console.log("prevSelectedRows",prevSelectedRows)
-     setSelMultipleRows(nowSelectedRows);
-  },[rowSelection,table])
+    setSelMultipleRows(nowSelectedRows);
+  }, [rowSelection, table])
 
 
   useImperativeHandle(ref, () => {
@@ -798,8 +798,8 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
             msg: `${id} 컬럼이 존재하지 않습니다`
           }
         }
-        let tableState:TableState = table.getState();
-        let { columnFilters, columnVisibility } =tableState;
+        let tableState: TableState = table.getState();
+        let { columnFilters, columnVisibility } = tableState;
         // console.log("tableState",tableState)
         // let obj = table.getState(), { columnFilters, columnVisibility } = obj;
 
@@ -830,10 +830,10 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
           msg: "성공"
         };
       },
-      getSelectedMultipleRows: ()=>{
+      getSelectedMultipleRows: () => {
         return selMultipleRows;
       },
-      removeSelectedMultipleRows:()=>{
+      removeSelectedMultipleRows: () => {
         setRowSelection({});
       }
       // set_columnOrder: (newOrder) => {
@@ -843,7 +843,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
       //   return table.getAllLeafColumns();
       // }
     }
-  }, [table,selMultipleRows]);
+  }, [table, selMultipleRows]);
 
 
   //drag and drop sensor 컬럼순서바꾸기
@@ -937,50 +937,50 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
             <tbody>
               {loading && <tr><td colSpan={columns.length}><Loading /></td></tr>}
               {!loading && table.getRowModel().rows.map(row => {
-                const isSelRow = row.original === selectedRow;
+                const isSelRow = row.original === selectedRow ? 1 : 0;
                 // console.log("row",row)
                 //hoverRowBackground
                 //hoverRowColor
                 return (
-                  <StyledTableRow key={row.id} 
-                  isSelected={isSelRow}
-                  selRowBackground={selRowBackground}
-                  selRowColor={selRowColor}
-                  hoverColor={hoverRowColor}
-                  hoverBackground={hoverRowBackground}
-                >
+                  <StyledTableRow key={row.id}
+                    isselected={isSelRow}
+                    selrowbackground={selRowBackground}
+                    selrowcolor={selRowColor}
+                    hovercolor={hoverRowColor}
+                    hoverbackground={hoverRowBackground}
+                  >
                     {row.getVisibleCells().map(cell => {
-                    // console.log("cell",cell)
-                    return (
-                      <SortableContext
-                        key={cell.id}
-                        items={columnOrder}
-                        strategy={horizontalListSortingStrategy}
-                      >
-                        <GP_Cell key={cell.id} cell={cell}
+                      // console.log("cell",cell)
+                      return (
+                        <SortableContext
+                          key={cell.id}
+                          items={columnOrder}
+                          strategy={horizontalListSortingStrategy}
+                        >
+                          <GP_Cell key={cell.id} cell={cell}
 
-                          onClick={(e) => {
-                            setSelectedRow((origin)=>{
-                              
-                              if(row.original===origin){
+                            onClick={(e) => {
+                              setSelectedRow((origin) => {
 
-                                return null;
+                                if (row.original === origin) {
+
+                                  return null;
+                                }
+                                else {
+                                  return row.original;
+                                }
+                              });
+                              if (onClickRow) {
+                                onClickRow(e, row.original, cell);
                               }
-                              else{
-                                return row.original;
-                              }
-                            });
-                            if (onClickRow) {
-                              onClickRow(e, row.original, cell);
-                            }
-                          }}
+                            }}
 
-                        />
-                      </SortableContext>
-                    )
-                  })}
+                          />
+                        </SortableContext>
+                      )
+                    })}
 
-                </StyledTableRow>
+                  </StyledTableRow>
                 )
               })}
             </tbody>
@@ -1036,7 +1036,13 @@ const GP_Header = ({
     zIndex: isDragging ? 1 : 0,
   };
 
-
+  const isMultipleCheckBox = useMemo(() => {
+    const columnDef: any = header.column.columnDef;
+    if (columnDef.accessorKey === "multipleSelRowCheckbox") {
+      return true;
+    }
+    return false;
+  }, [header.column.columnDef])
 
 
   const headerString = useMemo(() => {
@@ -1046,7 +1052,7 @@ const GP_Header = ({
       return columnDef.Header;
     }
     else {
-      return columnDef.accessorKey ||  columnDef.accessor;
+      return columnDef.accessorKey || columnDef.accessor;
     }
   }, [header.column.columnDef])
 
@@ -1075,45 +1081,55 @@ const GP_Header = ({
                 : header.column.getToggleSortingHandler()
             }
             {...(enableOrderingColumn && columnDef.enableOrdering !== false ?
-               { ...attributes, ...listeners } 
-               : {}
-            
+              { ...attributes, ...listeners }
+              : {}
+
             )}
 
           >
-            <span title={headerString}>{flexRender(header.column.columnDef.header, header.getContext())}</span>
+            {isMultipleCheckBox ? <>
+              {flexRender(header.column.columnDef.header, header.getContext())}
+            </> :
+              <span title={headerString}>{flexRender(header.column.columnDef.header, header.getContext())}</span>
+            }
 
           </div>
 
           {/* 소트*/}
-          <div className={`${columnDef?.useSort === false ? "" : "sortor"} 
-          ${header.column.getIsSorted() as string ? header.column.getIsSorted() : ''}`}
+          {!isMultipleCheckBox &&
+            <>
 
-            onClick={
-              columnDef?.useSort === false
-                ? () => { }
-                : header.column.getToggleSortingHandler()
-            }
-            {...(enableOrderingColumn && columnDef.enableOrdering !== false ?
-              { ...attributes, ...listeners } 
-              : {}
-           
-           )}
+              <div className={`${columnDef?.useSort === false ? "" : "sortor"} 
+                 ${header.column.getIsSorted() as string ? header.column.getIsSorted() : ''}`}
 
-            
-          />
+                onClick={
+                  columnDef?.useSort === false
+                    ? () => { }
+                    : header.column.getToggleSortingHandler()
+                }
+                {...(enableOrderingColumn && columnDef.enableOrdering !== false ?
+                  { ...attributes, ...listeners }
+                  : {}
+
+                )}
 
 
-          {/* 리사이즈 absolute*/}
-          {enableResizingColumn && header.column.getCanResize() && (
-            <div
-              onDoubleClick={() => header.column.resetSize()}
-              onMouseDown={header.getResizeHandler()}
-              onTouchStart={header.getResizeHandler()}
-              className={`resizer ${header.column.getIsResizing() ? 'isResizing' : ''
-                }`}
-            ></div>
-          )}
+              />
+
+
+              {/* 리사이즈 absolute*/}
+              {enableResizingColumn && header.column.getCanResize() && (
+                <div
+                  onDoubleClick={() => header.column.resetSize()}
+                  onMouseDown={header.getResizeHandler()}
+                  onTouchStart={header.getResizeHandler()}
+                  className={`resizer ${header.column.getIsResizing() ? 'isResizing' : ''}`}
+                ></div>
+              )}
+
+            </>
+          }
+
 
           <div />
         </div>
@@ -1191,7 +1207,7 @@ const GP_Cell = ({ cell, onClick }:
     <td style={style}
       ref={setNodeRef}
 
-      onClick={isMultipleCheckBox?()=>{}:onClick}
+      onClick={isMultipleCheckBox ? () => { } : onClick}
 
     >
       <div className="cell"
