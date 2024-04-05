@@ -1,4 +1,3 @@
-import styled from 'styled-components';
 import { HTMLProps, useEffect, useRef } from 'react';
 
 // 스타일드 컴포넌트 정의

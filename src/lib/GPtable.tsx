@@ -64,21 +64,21 @@ import Pagination from './pagination/Pagination';
 import CommonFilter from './filters/CommonFilter';
 import styled from 'styled-components';
 interface TableRowProps {
-  isselected: number;
-  selrowbackground?: string;
-  selrowcolor?: string;
-  hovercolor?: string;
-  hoverbackground?: string;
+  $isSelected: number;
+  $selRowBackground?: string;
+  $selRowColor?: string;
+  $hoverColor?: string;
+  $hoverBackground?: string;
 }
 
 const StyledTableRow = styled.tr<TableRowProps>`
-  background-color: ${props => props.isselected ? props.selrowbackground : 'inherit'};
-  color: ${props => props.isselected ? props.selrowcolor : 'inherit'};
+  background-color: ${props => props.$isSelected ? props.$selRowBackground : 'inherit'};
+  color: ${props => props.$isSelected ? props.$selRowColor : 'inherit'};
   // 다른 스타일 속성들
 
   &:hover {
-    background-color: ${props => props.hoverbackground};
-    color :${props => props.hovercolor};
+    background-color: ${props => props.$hoverBackground};
+    color :${props => props.$hoverColor};
     // 다른 hover 스타일 속성들
   }
 `;
@@ -943,11 +943,11 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
                 //hoverRowColor
                 return (
                   <StyledTableRow key={row.id}
-                    isselected={isSelRow}
-                    selrowbackground={selRowBackground}
-                    selrowcolor={selRowColor}
-                    hovercolor={hoverRowColor}
-                    hoverbackground={hoverRowBackground}
+                    $isSelected={isSelRow}
+                    $selRowBackground={selRowBackground}
+                    $selRowColor={selRowColor}
+                    $hoverColor={hoverRowColor}
+                    $hoverBackground={hoverRowBackground}
                   >
                     {row.getVisibleCells().map(cell => {
                       // console.log("cell",cell)
@@ -1063,42 +1063,40 @@ const GP_Header = ({
         ? null
         :
         <div
-
           {...{
             className: `header no-drag`,
           }}
-
         >
-          <div
-            className={`${columnDef?.useSort === false ? "headerText" : "headerText sortable"}`}
-            style={{
-              maxWidth: columnSize + "px"
-            }}
-
-            onClick={
-              columnDef?.useSort === false
-                ? () => { }
-                : header.column.getToggleSortingHandler()
-            }
-            {...(enableOrderingColumn && columnDef.enableOrdering !== false ?
-              { ...attributes, ...listeners }
-              : {}
-
-            )}
-
-          >
-            {isMultipleCheckBox ? <>
-              {flexRender(header.column.columnDef.header, header.getContext())}
-            </> :
-              <span title={headerString}>{flexRender(header.column.columnDef.header, header.getContext())}</span>
-            }
-
-          </div>
-
-          {/* 소트*/}
-          {!isMultipleCheckBox &&
+          {isMultipleCheckBox ? <>
+            {flexRender(header.column.columnDef.header, header.getContext())}
+          </>
+            :
             <>
+              <div
+                className={`${columnDef?.useSort === false ? "headerText" : "headerText sortable"}`}
+                style={{
+                  maxWidth: columnSize + "px"
+                }}
 
+                onClick={
+                  columnDef?.useSort === false
+                    ? () => { }
+                    : header.column.getToggleSortingHandler()
+                }
+                {...(enableOrderingColumn && columnDef.enableOrdering !== false ?
+                  { ...attributes, ...listeners }
+                  : {}
+
+                )}
+
+              >
+
+                <span title={headerString}>{flexRender(header.column.columnDef.header, header.getContext())}</span>
+
+
+              </div>
+
+              {/* 소트*/}
               <div className={`${columnDef?.useSort === false ? "" : "sortor"} 
                  ${header.column.getIsSorted() as string ? header.column.getIsSorted() : ''}`}
 
@@ -1112,8 +1110,6 @@ const GP_Header = ({
                   : {}
 
                 )}
-
-
               />
 
 
@@ -1129,9 +1125,6 @@ const GP_Header = ({
 
             </>
           }
-
-
-          <div />
         </div>
       }
 
