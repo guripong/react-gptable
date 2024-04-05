@@ -62,7 +62,26 @@ import Loading from './components/Loading/Loading';
 import GPtableToolbar from './toolbar/GPtableToolbar';
 import Pagination from './pagination/Pagination';
 import CommonFilter from './filters/CommonFilter';
+import styled from 'styled-components';
+interface TableRowProps {
+  isSelected: boolean;
+  selRowBackground?: string;
+  selRowColor?: string;
+  hoverColor?: string;
+  hoverBackground?: string;
+}
 
+const StyledTableRow = styled.tr<TableRowProps>`
+  background-color: ${props => props.isSelected ? props.selRowBackground : 'inherit'};
+  color: ${props => props.isSelected ? props.selRowColor : 'inherit'};
+  // 다른 스타일 속성들
+
+  &:hover {
+    background-color: ${props => props.hoverBackground};
+    color :${props => props.hoverColor};
+    // 다른 hover 스타일 속성들
+  }
+`;
 /**
     * Gptable props 설명
     * @param className 클레스내임
@@ -923,40 +942,45 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
                 //hoverRowBackground
                 //hoverRowColor
                 return (
-                  <tr key={row.id} 
-                  
-                    style={{ background: isSelRow ? selRowBackground : "", color: isSelRow ? selRowColor : "" }}>
+                  <StyledTableRow key={row.id} 
+                  isSelected={isSelRow}
+                  selRowBackground={selRowBackground}
+                  selRowColor={selRowColor}
+                  hoverColor={hoverRowColor}
+                  hoverBackground={hoverRowBackground}
+                >
                     {row.getVisibleCells().map(cell => {
-                      // console.log("cell",cell)
-                      return (
-                        <SortableContext
-                          key={cell.id}
-                          items={columnOrder}
-                          strategy={horizontalListSortingStrategy}
-                        >
-                          <GP_Cell key={cell.id} cell={cell}
+                    // console.log("cell",cell)
+                    return (
+                      <SortableContext
+                        key={cell.id}
+                        items={columnOrder}
+                        strategy={horizontalListSortingStrategy}
+                      >
+                        <GP_Cell key={cell.id} cell={cell}
 
-                            onClick={(e) => {
-                              setSelectedRow((origin)=>{
-                                
-                                if(row.original===origin){
+                          onClick={(e) => {
+                            setSelectedRow((origin)=>{
+                              
+                              if(row.original===origin){
 
-                                  return null;
-                                }
-                                else{
-                                  return row.original;
-                                }
-                              });
-                              if (onClickRow) {
-                                onClickRow(e, row.original, cell);
+                                return null;
                               }
-                            }}
+                              else{
+                                return row.original;
+                              }
+                            });
+                            if (onClickRow) {
+                              onClickRow(e, row.original, cell);
+                            }
+                          }}
 
-                          />
-                        </SortableContext>
-                      )
-                    })}
-                  </tr>
+                        />
+                      </SortableContext>
+                    )
+                  })}
+
+                </StyledTableRow>
                 )
               })}
             </tbody>
