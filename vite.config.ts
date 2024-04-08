@@ -8,18 +8,26 @@ import { getBabelOutputPlugin } from '@rollup/plugin-babel'
 
 export default defineConfig({
   base: "./",
-  plugins: [
+
+  resolve: {
+    alias: {
+      // I needed this to make dev mode work.
+      'react/jsx-runtime': 'react/jsx-runtime.js',
+    },
+  }, plugins: [
     dts({ rollupTypes: true }),
     // dts({
     //   insertTypesEntry: true, // 컴포넌트 타입 생성
     // }),
     tsconfigPaths(), // 절대 경로 생성시 사용된다. 
-    react(),
+    react({
+      jsxRuntime: 'classic'
+    }),
     // react({
-      // jsxImportSource: '@emotion/react',
-      // babel: {
-      //   plugins: ['@emotion/babel-plugin'],
-      // },
+    // jsxImportSource: '@emotion/react',
+    // babel: {
+    //   plugins: ['@emotion/babel-plugin'],
+    // },
     // }),
   ],
   // plugins: [dts({ rollupTypes: true }), react(), babel({ extensions: ['.js', '.jsx', '.ts', '.tsx'] })],
@@ -33,13 +41,13 @@ export default defineConfig({
       entry: path.resolve(__dirname, "src/lib/index.ts"), //라이브러리 진입점, 제공하고자하는 컴포넌트를 모두 export하는 부분
       name: "react-gptable",
       // formats: ["es", "cjs", "umd", "iife"],
-      formats: ["es","cjs"],
+      formats: ["es", "cjs"],
       fileName: (format) => `index.${format}.js`,
     },
     rollupOptions: {
       external: ['react', 'react-dom'], //라이브러리에 포함하지 않을 dependency 명시
       output: {
-        plugins:[
+        plugins: [
           getBabelOutputPlugin({
             allowAllFormats: true,
             presets: [
