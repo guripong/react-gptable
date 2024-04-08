@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import React,{ useCallback, useState } from "react";
 import { useReactTable } from "@tanstack/react-table";
 import BounceCheckBox from "../components/BounceCheckbox/BounceCheckBox";
 import DebouncedInput from "../components/DebouncedInput/DebouncedInput";

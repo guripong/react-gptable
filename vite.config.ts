@@ -7,22 +7,14 @@ import { getBabelOutputPlugin } from '@rollup/plugin-babel'
 //https://velog.io/@seonye-98/npm-%EB%9D%BC%EC%9D%B4%EB%B8%8C%EB%9F%AC%EB%A6%AC-%EB%B0%B0%ED%8F%AC-React-%EC%BB%B4%ED%8F%AC%EB%84%8C%ED%8A%B8-%EB%9D%BC%EC%9D%B4%EB%B8%8C%EB%9F%AC%EB%A6%AC-%EB%B0%B0%ED%8F%AC%EC%A0%84-%EC%84%A4%EC%A0%95
 
 export default defineConfig({
-  base: "./",
-
-  resolve: {
-    alias: {
-      // I needed this to make dev mode work.
-      'react/jsx-runtime': 'react/jsx-runtime.js',
-    },
-  }, plugins: [
+  // base: "./",
+  plugins: [
     dts({ rollupTypes: true }),
     // dts({
     //   insertTypesEntry: true, // 컴포넌트 타입 생성
     // }),
     tsconfigPaths(), // 절대 경로 생성시 사용된다. 
-    react({
-      jsxRuntime: 'classic'
-    }),
+    react({ jsxRuntime: 'classic' })
     // react({
     // jsxImportSource: '@emotion/react',
     // babel: {
