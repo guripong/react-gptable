@@ -1,3 +1,12 @@
+// // 기존 코드 최상단에 추가
+// const isNextJs = typeof window !== 'undefined' && (window as any).__NEXT_DATA__;
+
+// // Next.js 환경에서만 "use client" 지시문 추가
+// if (isNextJs) {
+//   'use client';
+// }
+'use client';
+
 import React, { CSSProperties, forwardRef, memo, useCallback, useEffect, useImperativeHandle, useMemo, useReducer, useRef, useState } from 'react';
 import type { GPColumn, GPColumn2, GPTableInstance, GPtableProps } from './GPTableTypes';
 import {
@@ -262,7 +271,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
   }, [columnVisibility, columnFilters]);
 
 
-  //usePagination에 따라서 pagerows 갯수가 바뀜 
+  //usePagination에 따라서 pagerows 갯수가 바뀜
   useEffect(() => {
     if (usePagination) {
       setPagination(p => {
@@ -327,7 +336,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
         Header: "다중선택",
         useFilter: false, //default false
         useSort: false, // default true
-        enableHiding: false,// 디폴트true 
+        enableHiding: false,// 디폴트true
         enableResizing: false,// default true
         enableOrdering: false, //default true
         size: 50,
@@ -577,8 +586,8 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
       // console.log("res_findkey",res_findkey);
       setPagination(prev => {
         if (rememberSelRow && pKey) {
-          //#@!  해당 pageIndex를 기억할것인가?    
-          //data     
+          //#@!  해당 pageIndex를 기억할것인가?
+          //data
           let before_pageSize = prev.pageSize;
 
           let returnobj = {
@@ -789,7 +798,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
       set_customFilter: (id, filter) => {
         //컬럼리스트중에 해당 ID가 있는지 확인
         //없으면  valid false , msg 해당 컬럼에 해당 id가 없습니다
-        //해당 ID가 visibility false이면 
+        //해당 ID가 visibility false이면
         //해당컬럼이 보이지않아서 필터를 걸 수 없습니다
         const visibleColumn = table.getAllLeafColumns();
         let isColumnExist = visibleColumn.find(c => c.id === id);
@@ -1098,7 +1107,7 @@ const GP_Header = ({
               </div>
 
               {/* 소트*/}
-              <div className={`${columnDef?.useSort === false ? "" : "sortor"} 
+              <div className={`${columnDef?.useSort === false ? "" : "sortor"}
                  ${header.column.getIsSorted() as string ? header.column.getIsSorted() : ''}`}
 
                 onClick={
