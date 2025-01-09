@@ -1,3 +1,4 @@
+"use client";
 import React,{ HTMLProps, useEffect, useRef } from 'react';
 
 // 스타일드 컴포넌트 정의
@@ -20,7 +21,7 @@ function IndeterminateCheckbox({
 
   return (
     <div className={className} >
-      <input type="checkbox" ref={ref} {...rest} 
+      <input type="checkbox" ref={ref} {...rest}
         style={{width:24,height:24,cursor:"pointer"}}
       />
     </div>

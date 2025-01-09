@@ -1,3 +1,4 @@
+"use client";
 import { Column, Table } from "@tanstack/react-table"
 import React from "react"
 import DebouncedInput from '../components/DebouncedInput/DebouncedInput';
@@ -11,9 +12,9 @@ function CommonFilter({
     const firstValue = table
       .getPreFilteredRowModel()
       .flatRows[0]?.getValue(column.id)
-  
+
     const columnFilterValue = column.getFilterValue()
-  
+
     const sortedUniqueValues = React.useMemo(
       () =>
         typeof firstValue === 'number'
@@ -22,11 +23,11 @@ function CommonFilter({
       [column.getFacetedUniqueValues()]
     )
     // console.log("firstValue", firstValue)
-  
+
     return typeof firstValue === 'number' ? (
       <>
         <div className="numberFilter">
-  
+
           <DebouncedInput
             className="gp_input"
             // style={{width:"auto"}}
@@ -41,7 +42,7 @@ function CommonFilter({
               ? `(${column.getFacetedMinMaxValues()?.[0]})`
               : ''
               }`}
-            
+
           />
           &nbsp;
           <DebouncedInput
@@ -58,10 +59,10 @@ function CommonFilter({
               ? `(${column.getFacetedMinMaxValues()?.[1]})`
               : ''
               }`}
-           
+
           />
         </div>
-  
+
       </>
     ) : (
       <>

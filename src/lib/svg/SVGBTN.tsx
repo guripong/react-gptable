@@ -1,3 +1,4 @@
+"use client";
 import React from 'react';
 import styled from 'styled-components';
 
@@ -20,7 +21,7 @@ const SVGBtn = styled.div<SVGBTNProps>`
     &:hover {
         &, * {
             cursor: pointer !important;
-  
+
             fill:lightgray;
         }
     }
@@ -30,7 +31,7 @@ const SVGBTN: React.FC<SVGBTNProps> = ({ onClick, direction, ...props }) => {
     return (
         <SVGBtn {...props} onClick={onClick}>
             {/* degree prop을 사용하지 않도록 수정 */}
-            <svg 
+            <svg
                 style={{
                     width:'80%',
                     transform:`rotate(${direction === 'up' ? '180deg' : '0deg'})`

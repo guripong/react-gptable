@@ -1,3 +1,4 @@
+"use client";
 import React from "react"
 
 // A debounced input react component

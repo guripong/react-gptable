@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useRef, ReactNode, CSSProperties } from 'react';
 import "./DropDown.scss";
 

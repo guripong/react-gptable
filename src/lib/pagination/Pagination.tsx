@@ -1,3 +1,4 @@
+"use client";
 import { PaginationState } from '@tanstack/react-table';
 import React from 'react';
 

@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import "./BounceCheckBox.scss";
 import _ from "lodash";
