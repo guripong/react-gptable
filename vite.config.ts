@@ -18,7 +18,9 @@ export default defineConfig({
     // }),
     tsconfigPaths(), // 절대 경로 생성시 사용된다. 
     react({ jsxRuntime: 'classic' }),
-    cssInjectedByJsPlugin(),
+    cssInjectedByJsPlugin({
+      topExecutionPriority: false, // CSS 주입을 JS 코드 뒤로 이동
+    }),
   ],
   // plugins: [dts({ rollupTypes: true }), react(), babel({ extensions: ['.js', '.jsx', '.ts', '.tsx'] })],
   server: {
@@ -39,6 +41,7 @@ export default defineConfig({
       output: {
         plugins: [
           getBabelOutputPlugin({
+            
             allowAllFormats: true,
             presets: [
               [
