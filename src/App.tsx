@@ -191,7 +191,6 @@ function App() {
   });
 
   const gptableRef = useRef<GPTableInstance>(null);
-  const gptableRef2 = useRef<GPTableInstance>(null);
 
   const refreshdata = useCallback(() => {
     // console.log("새로고친후 체크값들 기억X")
@@ -266,18 +265,27 @@ function App() {
         saveExcelButton: true, //default false,
       },
     };
-  }, [refreshdata, setCustomFilter]);
+  }, []);
 
+  useEffect(() => {
+    // console.log("바로default 시작")
+
+    async function doit() {
+      await gptableRef.current?.whenReady();
+      gptableRef.current?.setSelectRowAndMovePage({ key: "age", value: 24 });
+    }
+    doit();
+  }, []);
+  const handleTest = useCallback(async () => {
+    // gptableRef.current?.setSelectRowAndMovePage({key:"data_idx",value:4});
+
+    gptableRef.current?.setSelectRowAndMovePage({ key: "age", value: 24 });
+  }, []);
+  console.log("부모랜더")
   return (
     <div className="app" style={{ background: "#eee" }}>
       <div>
-        <button onClick={async()=>{
-          // gptableRef.current?.setSelectRowAndMovePage({key:"data_idx",value:4});
-
-          await gptableRef.current?.whenReady();
-          gptableRef.current?.setSelectRowAndMovePage({key:"age",value:24});
-
-        }}>강제로 pKey_idx4번 고르기</button>
+        <button onClick={handleTest}>강제로 pKey_idx4번 고르기</button>
       </div>
       <div style={{ width: "800px", display: "flex", background: "#fff" }}>
         {/* 1번테이블 */}
@@ -330,11 +338,7 @@ function App() {
             );
           }}
         />
-
-
-
       </div>
-
     </div>
   );
 }

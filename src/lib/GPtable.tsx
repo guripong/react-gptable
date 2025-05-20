@@ -142,6 +142,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     }
     return copy;
   });
+
   const rerender = useReducer(() => ({}), {})[1];
   const [loading, set_loading] = useState<boolean>(false);
 
@@ -245,8 +246,6 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
   // console.log("enableOrderingColumn",enableOrderingColumn)
   const gpTableWrapRef = useRef<HTMLDivElement>(null);
 
-  // console.log("rowSelection",rowSelection)
-
   const [pagination, setPagination] = React.useState<PaginationState>({
     pageSize: usePagination ? defaultPageSize ?? 10 : data.length,
     pageIndex: 0,
@@ -254,49 +253,17 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
 
   const [globalFilter, setGlobalFilter] = useState<any>("");
   const [columnOrder, setColumnOrder] = React.useState<ColumnOrderState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});
   const [sorting, setSorting] = useState<ColumnSort[]>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
   // console.log("sorting",sorting);
   // console.log("columnFilters", columnFilters)
 
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [selectedRow, setSelectedRow] = useState(null); //한줄
   const [selMultipleRows, setSelMultipleRows] = useState<any[]>([]);
-
-  useEffect(() => {
-    if (onCheckRow) {
-      // console.log("selMultipleRows",selMultipleRows)
-      onCheckRow(selMultipleRows);
-    }
-  }, [selMultipleRows, onCheckRow]);
-
-  //컬럼의 visibility 가 보이다가 안보일때 필터도 제거하는부분
-  const beforeColumnVisibility = useRef(columnVisibility);
-  useEffect(() => {
-    for (const key in beforeColumnVisibility.current) {
-      if (beforeColumnVisibility.current[key] && !columnVisibility[key]) {
-        //보이다가 숨겼을땐 필터도 제거해야함
-        setColumnFilters((prevFilters) =>
-          prevFilters.filter((filter) => filter.id !== key),
-        );
-      }
-    }
-    beforeColumnVisibility.current = columnVisibility;
-  }, [columnVisibility, columnFilters]);
-
-  // usePagination에 따라서 pagerows 갯수가 바뀜
-  useEffect(() => {
-    if (usePagination) {
-      setPagination((p) => {
-        return {
-          ...p,
-          pageIndex: 0,
-        };
-      });
-    }
-  }, [columnFilters, usePagination]);
+  // console.log("rowSelection",rowSelection)
 
   const icolumn = useMemo<GPColumn[]>(() => {
     let newLoadedColumn: GPColumn[] = beforeload_column;
@@ -430,7 +397,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     if (multipleSelRowCheckbox) {
       obj.multipleSelRowCheckbox = true;
     }
-    setColumnVisibility(obj);
+    // setColumnVisibility(obj);
     return obj;
   }, [icolumn, multipleSelRowCheckbox]);
 
@@ -463,9 +430,33 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
       }
     }
     // console.log("filterArr",filterArr)
-    setColumnFilters(filterArr);
+    // console.log("여기네",filterArr)
+
     return filterArr;
   }, [icolumn]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(initColumnFilter);
+  const [columnVisibility, setColumnVisibility] =
+    useState<VisibilityState>(initColumnVisibility);
+
+  // console.log("랜더콘솔",JSON.stringify(columnFilters));
+  // useEffect(() => {
+  //   console.log("@@랜더수체크", columnFilters);
+  // }, [columnFilters]);
+
+  //컬럼의 visibility 가 보이다가 안보일때 필터도 제거하는부분
+  const beforeColumnVisibility = useRef(columnVisibility);
+  useEffect(() => {
+    for (const key in beforeColumnVisibility.current) {
+      if (beforeColumnVisibility.current[key] && !columnVisibility[key]) {
+        //보이다가 숨겼을땐 필터도 제거해야함
+        // console.log("확인용");
+        setColumnFilters((prevFilters) =>
+          prevFilters.filter((filter) => filter.id !== key),
+        );
+      }
+    }
+    beforeColumnVisibility.current = columnVisibility;
+  }, [columnVisibility, columnFilters]);
 
   const table = useReactTable({
     data,
@@ -498,7 +489,6 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
       // },
       columnSizing: initColumnSizing,
       columnFilters: initColumnFilter,
-      // columnOrder: ['age', 'firstName', 'lastName'], //customize the initial column order
       columnVisibility: initColumnVisibility,
       // expanded: true, //expand all rows by default
 
@@ -531,21 +521,23 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     debugTable: false,
     debugHeaders: false,
     debugColumns: false,
-  });
+ });
 
-  // console.log("rows",rows)
-  //저장할때 pagination
-  //굉장히 어려운부분
-  //data 변경시 pagination과, row selection변경
+//  useEffect(()=> {console.log("table"), [table]})
+
+  //내가 골랐던 pKeyRow가 있으면
+  //자동으로 데이터가 바뀌어도 해당 page로 이동해주는 기능임임
+  const firstRenderDonotMove = useRef(true);
+
   useEffect(() => {
-    // console.log("pagination 값 초기화")
-    // console.log("usePagination",usePagination)
-    // console.log("defaultPageSize",defaultPageSize)
-    // console.log("rememberSelRow",rememberSelRow)
-    // console.log("multipleSelRowCheckbox",multipleSelRowCheckbox)
-    // console.log("바뀐data", data)
-
     // console.log("동작")
+    if (!rememberSelRow || !pKey || firstRenderDonotMove.current === true) {
+      return;
+    }
+    if (firstRenderDonotMove.current) {
+      firstRenderDonotMove.current = false;
+      return;
+    }
     function selectedRowsDone() {
       return new Promise(function (resolve) {
         setSelectedRow((prevSelectedOneRow) => {
@@ -578,8 +570,9 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     selectedRowsDone().then((res_findkey) => {
       // console.log("res_findkey",res_findkey);
       setPagination((prev) => {
+        if (!rememberSelRow || !pKey) return prev;
+
         if (rememberSelRow && pKey) {
-          //#@!  해당 pageIndex를 기억할것인가?
           //data
           let before_pageSize = prev.pageSize;
 
@@ -603,16 +596,19 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
               }
             }
           }
+          console.log("리맴버라서 다시랜더함");
           return returnobj;
         } else {
           if (usePagination) {
             //pageSize는 기억한다 그대로
+            // console.log("여기인가?")
             return {
               ...prev,
               // pageSize:  defaultPageSize ?? 10,
               pageIndex: 0,
             };
           } else {
+            // console.log("여기인가?")
             return {
               pageSize: data.length,
               pageIndex: 0,
@@ -622,14 +618,6 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
       });
     });
   }, [data, usePagination, defaultPageSize, rememberSelRow, pKey, table]);
-
-  //데이터바뀔시 체크박스 해제
-  useEffect(() => {
-    if (multipleSelRowCheckbox) {
-      // console.log("비워")
-      setRowSelection({});
-    }
-  }, [multipleSelRowCheckbox, data]);
 
   const resetAllColumnAttributes = useCallback(() => {
     // table.autoreset
@@ -684,6 +672,8 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
 
     //필터 초기화
     setGlobalFilter("");
+    // console.log("확인용2");
+
     setColumnFilters([]);
   }, [
     table,
@@ -757,16 +747,6 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     pagination,
   ]);
 
-  useEffect(() => {
-    //  console.log("rowSelection",rowSelection)
-    const nowSelectedRows = Object.keys(rowSelection).map((key) => {
-      return table.getSelectedRowModel().rowsById[key]?.original || [];
-      // console.log("여기")
-    });
-    // console.log("prevSelectedRows",prevSelectedRows)
-    setSelMultipleRows(nowSelectedRows);
-  }, [rowSelection, table]);
-
   const setSelectRowAndMovePage: GPTableInstance["setSelectRowAndMovePage"] =
     useCallback(
       ({ key, value }) => {
@@ -807,8 +787,38 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     if (rows.length > 0 && !isReadyRef.current) {
       isReadyRef.current = true;
       resolveReadyPromiseRef.current?.();
+      // console.log("랜더완료.");
     }
   }, [table]);
+
+  const firstRenderDoNotCall = useRef(true);
+
+  useEffect(() => {
+    if (firstRenderDoNotCall.current === true) {
+      firstRenderDoNotCall.current = false;
+      return;
+    }
+    const nowSelectedRows = Object.keys(rowSelection).map((key) => {
+      return table.getSelectedRowModel().rowsById[key]?.original || [];
+      // console.log("여기")
+    });
+    // console.log("prevSelectedRows",prevSelectedRows)
+    setSelMultipleRows(nowSelectedRows);
+
+    if (onCheckRow) {
+      onCheckRow(nowSelectedRows);
+    }
+  }, [rowSelection, table, onCheckRow]);
+
+  //데이터바뀔시 체크박스 해제
+  const firstRenderDonotChnageRef = useRef(true);
+  useEffect(() => {
+    if (firstRenderDonotChnageRef.current !== true && multipleSelRowCheckbox) {
+      // console.log("data가 바뀌어서 비워")
+      firstRenderDonotChnageRef.current = false;
+      setRowSelection({});
+    }
+  }, [multipleSelRowCheckbox, data]);
 
   useImperativeHandle(
     ref,
@@ -861,6 +871,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
           }
           //필터 타입을 확인해야하는데..
           //해당 필터가 무엇인지?
+          console.log("3확인");
           setColumnFilters((prevFilters) => {
             const existingFilterIndex = prevFilters.findIndex(
               (column) => column.id === id,
@@ -894,7 +905,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
         // }
       };
     },
-    [readyPromise,table, selMultipleRows, setSelectRowAndMovePage],
+    [readyPromise, table, selMultipleRows, setSelectRowAndMovePage],
   );
 
   //drag and drop sensor 컬럼순서바꾸기
