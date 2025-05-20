@@ -1,10 +1,3 @@
-// // 기존 코드 최상단에 추가
-// const isNextJs = typeof window !== 'undefined' && (window as any).__NEXT_DATA__;
-
-// // Next.js 환경에서만 "use client" 지시문 추가
-// if (isNextJs) {
-//   'use client';
-// }
 'use client';
 
 import React, { CSSProperties, forwardRef, memo, useCallback, useEffect, useImperativeHandle, useMemo, useReducer, useRef, useState } from 'react';
@@ -775,8 +768,41 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
   }, [rowSelection, table])
 
 
+
+
+
+
+  const setSelectRowAndMovePage: GPTableInstance["setSelectRowAndMovePage"] =
+    useCallback(
+      ({ key, value }) => {
+        if (!key || value === undefined || value === null) return false;
+
+        const rows = table.getSortedRowModel().rows;
+        const data = rows.map((d) => d.original);
+        const targetIndex = data.findIndex((row) => row[key] === value);
+
+        if (targetIndex === -1) return false;
+
+        const pageSize = pagination.pageSize;
+        const newPageIndex = Math.floor(targetIndex / pageSize);
+
+        // 페이지 이동
+        setPagination((prev) => ({
+          ...prev,
+          pageIndex: newPageIndex,
+        }));
+
+        // 해당 row 선택
+        setSelectedRow(data[targetIndex]);
+
+        return true;
+      },
+      [table, pagination],
+    );
+
   useImperativeHandle(ref, () => {
     return {
+      setSelectRowAndMovePage:setSelectRowAndMovePage,
       test: (value: number) => {
         return value + 1;
       },
@@ -853,7 +879,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
       //   return table.getAllLeafColumns();
       // }
     }
-  }, [table, selMultipleRows]);
+  }, [table, selMultipleRows,setSelectRowAndMovePage]);
 
 
   //drag and drop sensor 컬럼순서바꾸기

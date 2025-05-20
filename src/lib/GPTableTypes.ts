@@ -9,11 +9,20 @@ interface GPInstanceResponse{
     msg?:string;
 }
 interface GPTableInstance {
+
     /**
-    * 숫자를 입력받아 1을 더한 값을 반환합니다.
-    * @param value 입력으로 받는 숫자
-    * @returns 1을 더한 값
-    */
+     * 특정 key/value 조건을 가진 row를 찾아 선택하고, 해당 row가 위치한 페이지로 이동합니다.
+     *
+     * - pagination 옵션이 설정된 경우: 해당 row가 위치한 page로 자동 이동합니다.
+     * - 조건에 맞는 row가 없으면 false를 반환합니다.
+     * - 조건에 맞는 row가 있으면 해당 row를 선택 상태로 설정하고 true를 반환합니다.
+     *
+     * @param params.key 탐색할 row의 기준 key (예: 'data_idx')
+     * @param params.value 탐색할 value
+     * @returns boolean - 찾으면 true, 찾지 못하면 false
+     */
+    setSelectRowAndMovePage: (params:{key:string,value:unknown})=>boolean;
+
     test?: (value: number) => number;
     power?: () => string;
     getGPtableElementRef: () => HTMLDivElement | null;
@@ -47,7 +56,7 @@ interface GPTableInstance {
  * @see {@link GPColumn}
  */
 interface GPColumn {
-    /** 
+    /**
      *  selection 의 기준이 되는키 기억합니다
      * **/
     pKey?: boolean;
@@ -71,7 +80,7 @@ interface GPColumn {
      * 컬럼에 사용될 데이터의 키(key)입니다. accessorKey를 다치기힘들면 이것만치세요
      */
     accessor?: string;
-    
+
     /**
      * 컬럼의 순서 변경 기능을 사용할지 여부를 나타냅니다.
      */
@@ -106,7 +115,7 @@ interface GPColumn {
      * number value의 경우 min max
      * **/
     filterValue?: string | any[];
-    
+
     /**
      * 컬럼의 표시 여부를 나타냅니다.
      * 기본값은 true입니다.
@@ -131,7 +140,7 @@ interface GPColumn {
 
 }
 interface GPColumn2 {
-    /** 
+    /**
      *  selection 의 기준이 되는키 기억합니다
      * **/
     pKey?: boolean;
@@ -189,7 +198,7 @@ interface GPColumn2 {
      * number value의 경우 min max
      * **/
     filterValue?: string | any[];
-    
+
     /**
      * 컬럼의 표시 여부를 나타냅니다.
      * 기본값은 true입니다.
@@ -262,7 +271,7 @@ interface GPtableOption {
 interface GPtableProps<T> {
     className?: string;
     /**
-     * 
+     *
      * column 설명 여기에추가해줘
      * @see {@link Column}
      * **/
@@ -273,7 +282,7 @@ interface GPtableProps<T> {
 
 
     onClickRow?: (e: React.MouseEvent<HTMLTableCellElement, MouseEvent>, row: any , cell:any) => void; // 클릭된 행의 타입을 정확히 지정해야 합니다.
-    /** 
+    /**
     *   - row: 행 관련 옵션 설정입니다.
     *       - selRowBackground: 선택된 행의 배경색입니다. (기본값: '#fff')
     *       - multipleSelRowCheckbox: 다중 선택 행의 체크박스 사용 여부입니다. (기본값: false)
@@ -295,7 +304,7 @@ interface GPtableProps<T> {
 }// 컬럼의 타입 정의
 
 
-   
+
 declare const GPtable: ForwardRefExoticComponent<GPtableProps<any>>;
 
 export { GPtable };
