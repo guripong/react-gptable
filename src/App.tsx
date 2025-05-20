@@ -271,10 +271,11 @@ function App() {
   return (
     <div className="app" style={{ background: "#eee" }}>
       <div>
-        <button onClick={()=>{
+        <button onClick={async()=>{
           // gptableRef.current?.setSelectRowAndMovePage({key:"data_idx",value:4});
-          gptableRef.current?.setSelectRowAndMovePage({key:"age",value:24});
 
+          await gptableRef.current?.whenReady();
+          gptableRef.current?.setSelectRowAndMovePage({key:"age",value:24});
 
         }}>강제로 pKey_idx4번 고르기</button>
       </div>

@@ -9,7 +9,7 @@ interface GPInstanceResponse{
     msg?:string;
 }
 interface GPTableInstance {
-
+    whenReady: () => Promise<void>;
     /**
      * 특정 key/value 조건을 가진 row를 찾아 선택하고, 해당 row가 위치한 페이지로 이동합니다.
      *
