@@ -265,17 +265,17 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
 
 
   //usePagination에 따라서 pagerows 갯수가 바뀜
-  useEffect(() => {
-    if (usePagination) {
-      setPagination(p => {
-        return {
-          ...p,
-          pageIndex: 0
-        }
-      })
-    }
+  // useEffect(() => {
+  //   if (usePagination) {
+  //     setPagination(p => {
+  //       return {
+  //         ...p,
+  //         pageIndex: 0
+  //       }
+  //     })
+  //   }
 
-  }, [columnFilters, usePagination])
+  // }, [columnFilters, usePagination])
 
 
 
