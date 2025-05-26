@@ -22,6 +22,7 @@ interface GPTableInstance {
      * @returns boolean - 찾으면 true, 찾지 못하면 false
      */
     setSelectRowAndMovePage: (params:{key:string,value:unknown})=>boolean;
+    removeSelectRowAndMovePage: (moveFirstPage?:boolean)=>boolean;
 
     test?: (value: number) => number;
     power?: () => string;

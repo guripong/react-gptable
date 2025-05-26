@@ -747,6 +747,18 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     pagination,
   ]);
 
+  const removeSelectRowAndMovePage:GPTableInstance["removeSelectRowAndMovePage"]=
+  useCallback((moveFirstPage)=>{
+    setSelectedRow(null);
+    if(moveFirstPage===true&&pagination){
+        setPagination((prev) => ({
+          ...prev,
+          pageIndex: 0,
+        }));
+    }
+    return true;
+  },[pagination]);
+
   const setSelectRowAndMovePage: GPTableInstance["setSelectRowAndMovePage"] =
     useCallback(
       ({ key, value }) => {
@@ -825,6 +837,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     () => {
       return {
         whenReady: () => readyPromise,
+        removeSelectRowAndMovePage:removeSelectRowAndMovePage,
         setSelectRowAndMovePage: setSelectRowAndMovePage,
         test: (value: number) => {
           return value + 1;
@@ -905,7 +918,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
         // }
       };
     },
-    [readyPromise, table, selMultipleRows, setSelectRowAndMovePage],
+    [readyPromise, table, selMultipleRows, setSelectRowAndMovePage,removeSelectRowAndMovePage],
   );
 
   //drag and drop sensor 컬럼순서바꾸기

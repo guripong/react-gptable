@@ -276,16 +276,29 @@ function App() {
     }
     doit();
   }, []);
+
   const handleTest = useCallback(async () => {
     // gptableRef.current?.setSelectRowAndMovePage({key:"data_idx",value:4});
 
     gptableRef.current?.setSelectRowAndMovePage({ key: "age", value: 24 });
   }, []);
   console.log("부모랜더")
+    const handleTest2 = useCallback(async () => {
+    // gptableRef.current?.setSelectRowAndMovePage({key:"data_idx",value:4});
+
+    gptableRef.current?.removeSelectRowAndMovePage(true);
+  }, []);
+    const handleTest3 = useCallback(async () => {
+    // gptableRef.current?.setSelectRowAndMovePage({key:"data_idx",value:4});
+
+    gptableRef.current?.removeSelectRowAndMovePage();
+  }, []);
   return (
     <div className="app" style={{ background: "#eee" }}>
       <div>
         <button onClick={handleTest}>강제로 pKey_idx4번 고르기</button>
+        <button onClick={handleTest2}>selRow해제후1page이동</button>
+                <button onClick={handleTest3}>selRow해제만</button>
       </div>
       <div style={{ width: "800px", display: "flex", background: "#fff" }}>
         {/* 1번테이블 */}
