@@ -207,9 +207,15 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
       usePagination?.paginationArr && Array.isArray(usePagination.paginationArr)
         ? usePagination.paginationArr
         : [10, 20, 30, 40];
-    const defaultPageSize = Number.isInteger(usePagination?.defaultPageSize)
-      ? usePagination?.defaultPageSize
-      : paginationArr[0];
+    // const defaultPageSize = Number.isInteger(usePagination?.defaultPageSize)
+    //   ? usePagination?.defaultPageSize
+    //   : (pagination? paginationArr[0]:data.length||0) as number;
+
+  const defaultPageSize: number = Number.isInteger(usePagination?.defaultPageSize)
+    ? usePagination!.defaultPageSize as number
+    : usePagination
+      ? paginationArr[0]
+      : (Array.isArray(data) ? data.length : 0);
 
     const enableResizingColumn = option?.column?.resizing ?? true;
     const enableOrderingColumn = option?.column?.ordering ?? true;
