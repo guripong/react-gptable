@@ -189,7 +189,50 @@ function App() {
       ...d,
     ];
   });
+  const [data2, setData2] = useState<Person[]>(() => {
+    function createRandomUser() {
+      return {
+        data_idx: faker.number.int(),
+        firstName: faker.internet.userName(),
+        lastName: faker.internet.userName(),
+        age: faker.number.int({ min: 5, max: 40 }),
+      };
+    }
+    let d: Person[] = faker.helpers.multiple(createRandomUser, {
+      count: 1,
+    });
+    // console.log("d",d)
 
+    return [
+      {
+        data_idx: 1,
+        firstName: "소1111111111111111111111111",
+        lastName: "기영",
+        age: 24,
+        mycheckbox2: 1,
+        something: 1,
+      },
+      {
+        data_idx: 2,
+        firstName: "박",
+        lastName: "서하",
+        age: -5,
+      },
+      {
+        data_idx: 3,
+        firstName: "류",
+        lastName: "기정",
+        age: 14,
+      },
+      {
+        data_idx: 4,
+        firstName: "정",
+        lastName: "연광",
+        age: 3,
+      },
+      ...d,
+    ];
+  });
   const gptableRef = useRef<GPTableInstance>(null);
 
   const refreshdata = useCallback(() => {
@@ -266,7 +309,35 @@ function App() {
       },
     };
   }, []);
-
+  const tableOption2 = useMemo<GPtableOption>(() => {
+    return {
+      //saveTable:"asf", //잇을때만 저장
+      //저장할때는 width 순서 hide   // sort안하고
+      // autoSavetableName: "oppa", //필터값 기억한다
+      //컬럼순서
+      // row: {
+      //   rememberSelRow: true, //default true //한줄선택 기억 pKey가 있다면
+      //   selRowColor: "#666",
+      //   selRowBackground: "rgba(255,0,0,.1)", //1줄선택로우 배경색 default transparent
+      //   hoverRowColor: "#fff",
+      //   hoverRowBackground: "red",
+      //   multipleSelRowCheckbox: true, //다중 선택row default false
+      // },
+      column: {
+        resizing: true, //모든컬럼 리사이징 가능여부 default true
+        ordering: true, //모든컬럼 오더링 가능여부 default true
+      },
+      // pagination: {
+      //   paginationArr: [1, 2, 3, 10, 50], //default 10,20,30,40
+      //   // defaultPageSize: 2,  //default = paginationArr[0]
+      // },
+      toolbar: {
+        globalfilter: true, //default false
+        columnAttributeButton: true, // defaulte false,
+        saveExcelButton: true, //default false,
+      },
+    };
+  }, []);
   useEffect(() => {
     // console.log("바로default 시작")
 
@@ -282,75 +353,133 @@ function App() {
 
     gptableRef.current?.setSelectRowAndMovePage({ key: "age", value: 24 });
   }, []);
-  console.log("부모랜더")
-    const handleTest2 = useCallback(async () => {
+  console.log("부모랜더");
+  const handleTest2 = useCallback(async () => {
     // gptableRef.current?.setSelectRowAndMovePage({key:"data_idx",value:4});
 
     gptableRef.current?.removeSelectRowAndMovePage(true);
   }, []);
-    const handleTest3 = useCallback(async () => {
+  const handleTest3 = useCallback(async () => {
     // gptableRef.current?.setSelectRowAndMovePage({key:"data_idx",value:4});
 
     gptableRef.current?.removeSelectRowAndMovePage();
   }, []);
+
+  const handleAddTest = useCallback(() => {
+    // gptableRef?.current?.removeSelectedMultipleRows();
+    function createRandomUser() {
+      return {
+        data_idx: faker.number.int(),
+        firstName: faker.internet.userName(),
+        lastName: faker.internet.userName(),
+        age: faker.number.int({ min: 5, max: 40 }),
+      };
+    }
+    let d2: Person[] = faker.helpers.multiple(createRandomUser, {
+      count: 1,
+    });
+    setData2((d) => {
+      return [
+        ...d,
+        ...d2,
+      ];
+    });
+  }, []);
+  console.log("data2",data2);
+
   return (
     <div className="app" style={{ background: "#eee" }}>
       <div>
         <button onClick={handleTest}>강제로 pKey_idx4번 고르기</button>
         <button onClick={handleTest2}>selRow해제후1page이동</button>
-                <button onClick={handleTest3}>selRow해제만</button>
+        <button onClick={handleTest3}>selRow해제만</button>
       </div>
-      <div style={{ width: "800px", display: "flex", background: "#fff" }}>
-        {/* 1번테이블 */}
-        <GPtable
-          className="hoho"
-          ref={gptableRef}
-          data={data}
-          column={column}
-          onCheckRow={handleOnCheckRow}
-          onClickRow={(e, row, cell) => {
-            // console.log("클릭row",row);
-            // console.log("클릭cell",cell);
-            setSelRow(row);
-          }}
-          //새로고침시 체크 됨 날라가고 pkey
+      <div style={{ display: "flex" }}>
+        <div style={{ width: "800px", display: "flex", background: "#fff" }}>
+          {/* 1번테이블 */}
+          <GPtable
+            className="hoho"
+            ref={gptableRef}
+            data={data}
+            column={column}
+            onCheckRow={handleOnCheckRow}
+            onClickRow={(e, row, cell) => {
+              // console.log("클릭row",row);
+              // console.log("클릭cell",cell);
+              setSelRow(row);
+            }}
+            //새로고침시 체크 됨 날라가고 pkey
 
-          //한줄고른거 안날라가고 pkey값이 있으면 해당 page로 이동한다
-          //필터값 기억한다 default
+            //한줄고른거 안날라가고 pkey값이 있으면 해당 page로 이동한다
+            //필터값 기억한다 default
 
-          option={tableOption}
-          toolbar={() => {
-            return (
-              <>
-                <button
-                  className="btn"
-                  disabled={selRow ? true : false}
-                  onClick={() => {
-                    gptableRef?.current?.removeSelectedMultipleRows();
-                  }}
-                >
-                  제거 checkmultipleRows
-                </button>
-                <button
-                  className="btn"
-                  onClick={() => {
-                    let rows = gptableRef?.current?.getSelectedMultipleRows();
-                    console.log("rows", rows);
-                  }}
-                >
-                  선택checkRows 조회
-                </button>
-                <button className="btn btn-green" onClick={refreshdata}>
-                  새로고침
-                </button>
-                <button className="btn btn-red" onClick={setCustomFilter}>
-                  나이 max5 필터 걸기
-                </button>
-                {/* <button className="btn btn-orange" disabled={true}>테이블저장</button> */}
-              </>
-            );
-          }}
-        />
+            option={tableOption}
+            toolbar={() => {
+              return (
+                <>
+                  <button
+                    className="btn"
+                    disabled={selRow ? true : false}
+                    onClick={() => {
+                      gptableRef?.current?.removeSelectedMultipleRows();
+                    }}
+                  >
+                    제거 checkmultipleRows
+                  </button>
+                  <button
+                    className="btn"
+                    onClick={() => {
+                      let rows = gptableRef?.current?.getSelectedMultipleRows();
+                      console.log("rows", rows);
+                    }}
+                  >
+                    선택checkRows 조회
+                  </button>
+                  <button className="btn btn-green" onClick={refreshdata}>
+                    새로고침
+                  </button>
+                  <button className="btn btn-red" onClick={setCustomFilter}>
+                    나이 max5 필터 걸기
+                  </button>
+                  {/* <button className="btn btn-orange" disabled={true}>테이블저장</button> */}
+                </>
+              );
+            }}
+          />
+        </div>
+        <div style={{ width: "800px", display: "flex", background: "#fff" }}>
+          <GPtable
+            className="hoho2"
+            // ref={gptableRef}
+            data={data2}
+            column={column}
+            // onCheckRow={handleOnCheckRow}
+            // onClickRow={(e, row, cell) => {
+            //   // console.log("클릭row",row);
+            //   // console.log("클릭cell",cell);
+            //   setSelRow(row);
+            // }}
+            //새로고침시 체크 됨 날라가고 pkey
+
+            //한줄고른거 안날라가고 pkey값이 있으면 해당 page로 이동한다
+            //필터값 기억한다 default
+
+            option={tableOption2}
+            toolbar={() => {
+              return (
+                <>
+                  <button
+                    className="btn"
+                    // disabled={selRow ? true : false}
+                    onClick={handleAddTest}
+                  >
+                    추가
+                  </button>
+                </>
+              );
+            }}
+          />
+        </div>
       </div>
     </div>
   );

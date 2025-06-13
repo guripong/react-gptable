@@ -211,12 +211,16 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     //   ? usePagination?.defaultPageSize
     //   : (pagination? paginationArr[0]:data.length||0) as number;
 
-  const defaultPageSize: number = Number.isInteger(usePagination?.defaultPageSize)
-    ? usePagination!.defaultPageSize as number
-    : usePagination
-      ? paginationArr[0]
-      : (Array.isArray(data) ? data.length : 0);
-
+    const defaultPageSize: number = Number.isInteger(
+      usePagination?.defaultPageSize,
+    )
+      ? (usePagination!.defaultPageSize as number)
+      : usePagination
+        ? paginationArr[0]
+        : Array.isArray(data)
+          ? data.length
+          : 0;
+    console.log("defaultPageSize", defaultPageSize);
     const enableResizingColumn = option?.column?.resizing ?? true;
     const enableOrderingColumn = option?.column?.ordering ?? true;
 
@@ -253,10 +257,17 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
   const gpTableWrapRef = useRef<HTMLDivElement>(null);
 
   const [pagination, setPagination] = React.useState<PaginationState>({
-    pageSize: usePagination ? defaultPageSize ?? 10 : data.length,
+    pageSize: usePagination ? (defaultPageSize ?? 10) : data.length,
     pageIndex: 0,
   });
-
+  useEffect(() => {
+    if (!usePagination) {
+      setPagination({
+        pageSize: usePagination ? (defaultPageSize ?? 10) : data.length,
+        pageIndex: 0,
+      });
+    }
+  }, [data, usePagination, defaultPageSize]);
   const [globalFilter, setGlobalFilter] = useState<any>("");
   const [columnOrder, setColumnOrder] = React.useState<ColumnOrderState>([]);
 
@@ -440,7 +451,8 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
 
     return filterArr;
   }, [icolumn]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(initColumnFilter);
+  const [columnFilters, setColumnFilters] =
+    useState<ColumnFiltersState>(initColumnFilter);
   const [columnVisibility, setColumnVisibility] =
     useState<VisibilityState>(initColumnVisibility);
 
@@ -527,9 +539,9 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     debugTable: false,
     debugHeaders: false,
     debugColumns: false,
- });
+  });
 
-//  useEffect(()=> {console.log("table"), [table]})
+  //  useEffect(()=> {console.log("table"), [table]})
 
   //내가 골랐던 pKeyRow가 있으면
   //자동으로 데이터가 바뀌어도 해당 page로 이동해주는 기능임임
@@ -753,17 +765,20 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     pagination,
   ]);
 
-  const removeSelectRowAndMovePage:GPTableInstance["removeSelectRowAndMovePage"]=
-  useCallback((moveFirstPage)=>{
-    setSelectedRow(null);
-    if(moveFirstPage===true&&pagination){
-        setPagination((prev) => ({
-          ...prev,
-          pageIndex: 0,
-        }));
-    }
-    return true;
-  },[pagination]);
+  const removeSelectRowAndMovePage: GPTableInstance["removeSelectRowAndMovePage"] =
+    useCallback(
+      (moveFirstPage) => {
+        setSelectedRow(null);
+        if (moveFirstPage === true && pagination) {
+          setPagination((prev) => ({
+            ...prev,
+            pageIndex: 0,
+          }));
+        }
+        return true;
+      },
+      [pagination],
+    );
 
   const setSelectRowAndMovePage: GPTableInstance["setSelectRowAndMovePage"] =
     useCallback(
@@ -838,94 +853,96 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     }
   }, [multipleSelRowCheckbox, data]);
 
-  useImperativeHandle(
-    ref,
-    () => {
-      return {
-        whenReady: () => readyPromise,
-        removeSelectRowAndMovePage:removeSelectRowAndMovePage,
-        setSelectRowAndMovePage: setSelectRowAndMovePage,
-        test: (value: number) => {
-          return value + 1;
-        },
-        power: () => {
-          return "power";
-        },
-        getGPtableElementRef: () => {
-          return gpTableWrapRef?.current;
-        },
-        getTable: () => {
-          return table;
-        },
-        forceRerender: () => {
-          rerender();
-        },
-        setLoading: (val: boolean) => {
-          set_loading(val);
-        },
-        set_customFilter: (id, filter) => {
-          //컬럼리스트중에 해당 ID가 있는지 확인
-          //없으면  valid false , msg 해당 컬럼에 해당 id가 없습니다
-          //해당 ID가 visibility false이면
-          //해당컬럼이 보이지않아서 필터를 걸 수 없습니다
-          const visibleColumn = table.getAllLeafColumns();
-          let isColumnExist = visibleColumn.find((c) => c.id === id);
-          if (!isColumnExist) {
-            return {
-              valid: false,
-              msg: `${id} 컬럼이 존재하지 않습니다`,
-            };
-          }
-          let tableState: TableState = table.getState();
-          let { columnFilters, columnVisibility } = tableState;
-          // console.log("tableState",tableState)
-          // let obj = table.getState(), { columnFilters, columnVisibility } = obj;
-
-          let isTargetFilterHide = columnVisibility[id] === false;
-          if (isTargetFilterHide) {
-            return {
-              valid: false,
-              msg: `${id} 컬럼이 숨겨진상태라 필터를 걸 수 없습니다`,
-            };
-          }
-          //필터 타입을 확인해야하는데..
-          //해당 필터가 무엇인지?
-          console.log("3확인");
-          setColumnFilters((prevFilters) => {
-            const existingFilterIndex = prevFilters.findIndex(
-              (column) => column.id === id,
-            );
-
-            if (existingFilterIndex !== -1) {
-              // If the filter exists, update its value
-              prevFilters[existingFilterIndex].value = filter;
-            } else {
-              // If the filter doesn't exist, add it to the array
-              prevFilters.push({ id: id, value: filter });
-            }
-            return [...prevFilters]; // Ensure returning a new array to trigger re-render
-          });
+  useImperativeHandle(ref, () => {
+    return {
+      whenReady: () => readyPromise,
+      removeSelectRowAndMovePage: removeSelectRowAndMovePage,
+      setSelectRowAndMovePage: setSelectRowAndMovePage,
+      test: (value: number) => {
+        return value + 1;
+      },
+      power: () => {
+        return "power";
+      },
+      getGPtableElementRef: () => {
+        return gpTableWrapRef?.current;
+      },
+      getTable: () => {
+        return table;
+      },
+      forceRerender: () => {
+        rerender();
+      },
+      setLoading: (val: boolean) => {
+        set_loading(val);
+      },
+      set_customFilter: (id, filter) => {
+        //컬럼리스트중에 해당 ID가 있는지 확인
+        //없으면  valid false , msg 해당 컬럼에 해당 id가 없습니다
+        //해당 ID가 visibility false이면
+        //해당컬럼이 보이지않아서 필터를 걸 수 없습니다
+        const visibleColumn = table.getAllLeafColumns();
+        let isColumnExist = visibleColumn.find((c) => c.id === id);
+        if (!isColumnExist) {
           return {
-            valid: true,
-            msg: "성공",
+            valid: false,
+            msg: `${id} 컬럼이 존재하지 않습니다`,
           };
-        },
-        getSelectedMultipleRows: () => {
-          return selMultipleRows;
-        },
-        removeSelectedMultipleRows: () => {
-          setRowSelection({});
-        },
-        // set_columnOrder: (newOrder) => {
-        //   table.setColumnOrder(newOrder);
-        // },
-        // get_columnOrder: () => {
-        //   return table.getAllLeafColumns();
-        // }
-      };
-    },
-    [readyPromise, table, selMultipleRows, setSelectRowAndMovePage,removeSelectRowAndMovePage],
-  );
+        }
+        let tableState: TableState = table.getState();
+        let { columnFilters, columnVisibility } = tableState;
+        // console.log("tableState",tableState)
+        // let obj = table.getState(), { columnFilters, columnVisibility } = obj;
+
+        let isTargetFilterHide = columnVisibility[id] === false;
+        if (isTargetFilterHide) {
+          return {
+            valid: false,
+            msg: `${id} 컬럼이 숨겨진상태라 필터를 걸 수 없습니다`,
+          };
+        }
+        //필터 타입을 확인해야하는데..
+        //해당 필터가 무엇인지?
+        console.log("3확인");
+        setColumnFilters((prevFilters) => {
+          const existingFilterIndex = prevFilters.findIndex(
+            (column) => column.id === id,
+          );
+
+          if (existingFilterIndex !== -1) {
+            // If the filter exists, update its value
+            prevFilters[existingFilterIndex].value = filter;
+          } else {
+            // If the filter doesn't exist, add it to the array
+            prevFilters.push({ id: id, value: filter });
+          }
+          return [...prevFilters]; // Ensure returning a new array to trigger re-render
+        });
+        return {
+          valid: true,
+          msg: "성공",
+        };
+      },
+      getSelectedMultipleRows: () => {
+        return selMultipleRows;
+      },
+      removeSelectedMultipleRows: () => {
+        setRowSelection({});
+      },
+      // set_columnOrder: (newOrder) => {
+      //   table.setColumnOrder(newOrder);
+      // },
+      // get_columnOrder: () => {
+      //   return table.getAllLeafColumns();
+      // }
+    };
+  }, [
+    readyPromise,
+    table,
+    selMultipleRows,
+    setSelectRowAndMovePage,
+    removeSelectRowAndMovePage,
+  ]);
 
   //drag and drop sensor 컬럼순서바꾸기
 
