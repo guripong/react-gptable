@@ -142,7 +142,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     }
     return copy;
   });
-
+  // console.log("안족랜더")
   const rerender = useReducer(() => ({}), {})[1];
   const [loading, set_loading] = useState<boolean>(false);
 
@@ -220,7 +220,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
         : Array.isArray(data)
           ? data.length
           : 0;
-    console.log("defaultPageSize", defaultPageSize);
+    // console.log("defaultPageSize", defaultPageSize);
     const enableResizingColumn = option?.column?.resizing ?? true;
     const enableOrderingColumn = option?.column?.ordering ?? true;
 
@@ -281,6 +281,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
   const [selectedRow, setSelectedRow] = useState(null); //한줄
   const [selMultipleRows, setSelMultipleRows] = useState<any[]>([]);
   // console.log("rowSelection",rowSelection)
+  // console.log("내부의 selRow",selectedRow);
 
   const icolumn = useMemo<GPColumn[]>(() => {
     let newLoadedColumn: GPColumn[] = beforeload_column;
@@ -549,7 +550,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
 
   useEffect(() => {
     // console.log("동작")
-    if (!rememberSelRow || !pKey || firstRenderDonotMove.current === true) {
+    if (!rememberSelRow || !pKey) {
       return;
     }
     if (firstRenderDonotMove.current) {
@@ -559,6 +560,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
     function selectedRowsDone() {
       return new Promise(function (resolve) {
         setSelectedRow((prevSelectedOneRow) => {
+          // console.log("들어오니")
           if (rememberSelRow && pKey && prevSelectedOneRow) {
             // console.log("prevSelectedOneRow",prevSelectedOneRow);
             // console.log("pKey",pKey)

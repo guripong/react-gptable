@@ -1,5 +1,6 @@
 import { useReactTable } from '@tanstack/react-table';
 import { ForwardRefExoticComponent } from 'react';
+// import type { CellContext } from '@tanstack/react-table';
 /**
  * 한번에 다 만들고 달아줘
  * **/
@@ -38,7 +39,11 @@ interface GPTableInstance {
     removeSelectedMultipleRows : ()=>void;
 }
 
-
+type GPCellContextLike<TData, TValue> = {
+  getValue: () => TValue;
+  renderValue: () => TValue;
+  row: { original: TData; value: string };
+};
 
 /**
  * GPTable 컴포넌트에서 사용되는 컬럼의 정보를 정의하는 인터페이스입니다.
