@@ -101,6 +101,42 @@ const StyledTableRow = styled.tr<TableRowProps>`
     // 다른 hover 스타일 속성들
   }
 `;
+
+function useRenderedWidths(table: Table<any>, tableRef: React.RefObject<HTMLTableElement>) {
+  const [rendered, setRendered] = useState<Record<string, number>>({});
+
+  const recalc = useCallback(() => {
+    const total = table.getCenterTotalSize();
+    const actual = tableRef.current?.clientWidth ?? total;
+    const scale = total > 0 ? actual / total : 1;
+
+    const map: Record<string, number> = {};
+    table.getCenterLeafColumns().forEach(col => {
+      map[col.id] = Math.max(0, Math.round(col.getSize() * scale));
+    });
+    setRendered(map);
+  }, [table, tableRef]);
+
+  const state = table.getState();
+  useEffect(() => { recalc(); }, [
+    recalc,
+    state.columnSizing,
+    state.columnVisibility,
+    state.columnOrder,
+    state.sorting,
+    state.pagination,
+  ]);
+
+  useEffect(() => {
+    if (!tableRef.current) return;
+    const ro = new ResizeObserver(() => recalc());
+    ro.observe(tableRef.current);
+    return () => ro.disconnect();
+  }, [recalc]);
+
+  return rendered;
+}
+
 /**
  * Gptable props 설명
  * @param className 클레스내임
@@ -973,6 +1009,9 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
   // console.log("columns.length",columns.length)
   // console.log("pagination",pagination);
   // console.log("랜더")
+  const tableRef = useRef<HTMLTableElement>(null);
+  const renderedWidths = useRenderedWidths(table, tableRef);
+
   return (
     <DndContext
       collisionDetection={closestCenter}
@@ -1007,7 +1046,9 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
               width: table.getCenterTotalSize(),
               minWidth: "100%",
             }}
+            ref={tableRef}
           >
+
             {/* header render 부분 */}
             <thead>
               {table.getHeaderGroups().map((headerGroup) => (
@@ -1024,6 +1065,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
                           table={table}
                           enableResizingColumn={enableResizingColumn}
                           enableOrderingColumn={enableOrderingColumn}
+                          renderedWidths={renderedWidths}
                         />
                       );
                     })}
@@ -1067,6 +1109,7 @@ const GPtable = forwardRef<GPTableInstance, GPtableProps<any>>((props, ref) => {
                             <GP_Cell
                               key={cell.id}
                               cell={cell}
+                              renderedWidths={renderedWidths}
                               onClick={(e) => {
                                 setSelectedRow((origin) => {
                                   if (row.original === origin) {
@@ -1110,11 +1153,13 @@ const GP_Header = ({
   table,
   enableResizingColumn,
   enableOrderingColumn,
+  renderedWidths,
 }: {
   header: Header<any, unknown>;
   table: Table<any>;
   enableResizingColumn: boolean;
   enableOrderingColumn: boolean;
+  renderedWidths:Record<string, number>;
 }) => {
   const columnDef: any = header.column.columnDef;
   // console.log("enableOrderingColumn",enableOrderingColumn)
@@ -1131,7 +1176,10 @@ const GP_Header = ({
           setNodeRef: () => {},
           transform: { x: 0, y: 0, scaleX: 1, scaleY: 1 },
         };
-  const columnSize = header.column.getSize();
+  // const columnSize = header.column.getSize();
+  const columnSize = renderedWidths[header.column.id] ?? header.column.getSize();
+  // const columnSize=100;
+      // console.log("columnSize",columnSize);
 
   const style: CSSProperties = {
     opacity: isDragging ? 0.8 : 1,
@@ -1239,9 +1287,11 @@ const GP_Header = ({
 const GP_Cell = ({
   cell,
   onClick,
+  renderedWidths,
 }: {
   cell: Cell<any, unknown>;
   onClick: (event: React.MouseEvent<HTMLTableCellElement, MouseEvent>) => void;
+    renderedWidths:Record<string, number>;
 }) => {
   const columnDef: any = cell.column.columnDef;
 
@@ -1259,9 +1309,11 @@ const GP_Cell = ({
         };
   const tdref = useRef(null);
   const cellSize = useMemo(() => {
-    let size = cell.column.getSize();
+    // let size = cell.column.getSize();
+  const columnSize = renderedWidths[cell.column.id] ?? cell.column.getSize();
     // console.log("tdref",tdref)
-    return size;
+    return columnSize;
+    // return size;
   }, [cell.column.getSize()]);
 
   // console.log("cellSize",cellSize)
@@ -1271,7 +1323,7 @@ const GP_Cell = ({
     position: "relative",
     transform: CSS.Translate.toString(transform), // translate instead of transform to avoid squishing
     transition: "width transform 0.2s ease-in-out",
-    width: cell.column.getSize(),
+    width: cellSize,
     zIndex: isDragging ? 1 : 0,
   };
   const isMultipleCheckBox = useMemo(() => {
@@ -1310,7 +1362,9 @@ const GP_Cell = ({
         {isMultipleCheckBox ? (
           <>{flexRender(cell.column.columnDef.cell, cell.getContext())}</>
         ) : (
-          <div className="cellText" style={{ maxWidth: cellSize }}>
+          <div className="cellText"
+          style={{ maxWidth: cellSize }}
+          >
             <span title={cellText}>
               {flexRender(cell.column.columnDef.cell, cell.getContext())}
             </span>

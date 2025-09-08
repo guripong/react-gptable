@@ -75,7 +75,7 @@ function App() {
         // Header: "성", // 표시될 글자 안넣으면 accessor name으로 표시
         accessor: "firstName", //key name
         // minWidth:44, //최소 컬럼넓이
-        width: 150,
+        // width: 50,
         accessorFn: (row: any) => {
           return row.firstName + "@검색가능";
         }, //필터가능  //1차랜더값

@@ -318,7 +318,7 @@ $hover-color: rgb(70, 70, 70);
         /*height:50%; */
         background-position: right;
         background-repeat: no-repeat;
-        
+
 
         background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAQAAADYWf5HAAAAkElEQVQoz7X QMQ5AQBCF4dWQSJxC5wwax1Cq1e7BAdxD5SL+Tq/QCM1oNiJidwox0355mXnG/DrEtIQ6azioNZQxI0ykPhTQIwhCR+BmBYtlK7kLJYwWCcJA9M4qdrZrd8pPjZWPtOqdRQy320YSV17OatFC4euts6z39GYMKRPCTKY9UnPQ6P+GtMRfGtPnBCiqhAeJPmkqAAAAAElFTkSuQmCC");
 
@@ -439,7 +439,8 @@ $hover-color: rgb(70, 70, 70);
                         white-space: nowrap;
                         text-overflow: ellipsis;
                         overflow: hidden;
-
+                        padding-left:10px;
+                        padding-right:10px;
                         div {
 
                             white-space: nowrap;
